@@ -1,0 +1,2051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plant an Idea — parcel prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,600&display=swap" rel="stylesheet">
+<style>
+:root{--dusk:#1B2430;--pane:#232F3E;--pane2:#2B3949;--lit:#F2C14E;--moss:#84B096;
+--stop:#E08A6B;--glass:#C2D0E0;--chalk:#F6F4EF;--rule:rgba(194,208,224,.2)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--dusk);color:var(--glass);font-family:"Newsreader",Georgia,serif;
+font-size:1rem;line-height:1.55;font-weight:300}
+.wrap{max-width:44rem;margin:0 auto;padding:1.4rem 1rem 4rem}
+h1,h2,h3,.ui,button{font-family:"Bricolage Grotesque",system-ui,sans-serif}
+h1{font-size:1.55rem;margin:0 0 .2rem;color:var(--chalk);font-weight:800}
+.sub{color:rgba(194,208,224,.7);font-size:.88rem;margin:0 0 1.3rem}
+h2{font-size:1rem;color:var(--chalk);font-weight:600;margin:0 0 .7rem;display:flex;gap:.45rem;align-items:baseline}
+h2 .n{font-size:.7rem;color:var(--lit);font-weight:800}
+.card{background:var(--pane);border-radius:3px;padding:1rem;margin:0 0 1rem;border-top:3px solid var(--rule)}
+.card.go{border-top-color:var(--moss)}
+.card.key{border-top-color:var(--lit)}
+.card.warn{border-top-color:var(--stop)}
+p{margin:0 0 .7rem}
+a{color:var(--lit)}
+small{font-size:.82rem;color:rgba(194,208,224,.65)}
+
+/* parcel header */
+.parcel{display:flex;flex-wrap:wrap;gap:.4rem .9rem;font-size:.85rem;margin-top:.5rem}
+.parcel div{background:rgba(0,0,0,.22);padding:.25rem .55rem;border-radius:2px}
+.parcel b{color:var(--chalk);font-family:"Bricolage Grotesque",sans-serif;font-weight:600}
+.edit{font-size:.8rem;color:var(--lit);cursor:pointer;text-decoration:underline;background:none;border:0;padding:0}
+
+/* nesting diagram */
+.nest{display:flex;align-items:center;gap:.4rem;font-size:.8rem;margin:.3rem 0 0;flex-wrap:wrap}
+.nest span{padding:.22rem .5rem;border:1px solid var(--rule);border-radius:2px}
+.nest span.here{border-color:var(--lit);color:var(--chalk);background:rgba(242,193,78,.1)}
+.nest i{color:rgba(194,208,224,.5);font-style:normal}
+
+/* role tag */
+.roles{display:flex;flex-wrap:wrap;gap:.4rem}
+.roles button{background:transparent;border:1px solid var(--rule);color:var(--glass);
+font-size:.83rem;font-weight:600;padding:.35rem .7rem;border-radius:2px;cursor:pointer}
+.roles button.on{border-color:var(--moss);background:rgba(132,176,150,.16);color:var(--chalk)}
+
+/* ideas */
+.idea{background:rgba(0,0,0,.2);border-radius:3px;padding:.75rem .85rem;margin-bottom:.6rem}
+.idea .body{color:var(--chalk);font-size:.97rem;margin:0 0 .5rem}
+.idea .meta{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;font-size:.8rem}
+.bar{height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;flex:1;min-width:70px}
+.bar i{display:block;height:100%;background:var(--moss)}
+.badge{font-family:"Bricolage Grotesque",sans-serif;font-size:.68rem;font-weight:800;
+padding:.15rem .4rem;border-radius:2px;background:rgba(242,193,78,.18);color:var(--lit)}
+.badge.relay{background:rgba(194,208,224,.12);color:rgba(194,208,224,.8)}
+.ladder{display:flex;gap:2px;margin:.55rem 0 .6rem;flex-wrap:wrap}
+.ladder span{flex:1;min-width:58px;font-family:"Bricolage Grotesque",sans-serif;font-size:.62rem;
+font-weight:800;text-align:center;padding:.28rem .1rem;background:rgba(255,255,255,.05);
+color:rgba(194,208,224,.45);border-radius:2px}
+.ladder span.on{background:rgba(132,176,150,.26);color:var(--chalk)}
+.tend{font-size:.86rem;margin:.5rem 0 .6rem;color:rgba(194,208,224,.85)}
+.tend b{color:var(--chalk);font-family:"Bricolage Grotesque",sans-serif;font-weight:600}
+.needs{background:rgba(242,193,78,.1);border-left:2px solid var(--lit);padding:.55rem .7rem;border-radius:2px;margin-bottom:.6rem}
+.needs.done{background:rgba(132,176,150,.12);border-left-color:var(--moss)}
+.needs .lbl{font-family:"Bricolage Grotesque",sans-serif;font-size:.62rem;font-weight:800;
+letter-spacing:.04em;color:var(--lit);margin:0 0 .2rem}
+.needs.done .lbl{color:var(--moss)}
+.needs p:last-child{margin:0;font-size:.9rem;color:var(--chalk)}
+.mode{font-family:"Bricolage Grotesque",sans-serif;font-size:.62rem;font-weight:800;
+padding:.12rem .35rem;border-radius:2px;white-space:nowrap}
+.mode.online{background:rgba(132,176,150,.22);color:var(--moss)}
+.mode.call{background:rgba(224,138,107,.2);color:var(--stop)}
+.btn.tiny{font-size:.76rem;padding:.3rem .6rem;margin-top:0;display:inline-block;text-decoration:none}
+.toggle{margin-top:.1rem}
+.qs{margin-top:.6rem}
+.q{border-left:2px solid var(--rule);padding:.5rem .7rem;margin-bottom:.5rem;background:rgba(0,0,0,.18);border-radius:2px}
+.q.resolved{border-left-color:var(--moss);opacity:.85}
+.q.working{border-left-color:var(--lit)}
+.qhead{display:flex;gap:.4rem;align-items:center;margin-bottom:.3rem}
+.qhead .st{font-size:.72rem;color:rgba(194,208,224,.6)}
+.qt{font-size:.9rem;color:var(--chalk);margin:0 0 .3rem;font-weight:400}
+.qw{font-size:.83rem;margin:0 0 .45rem;color:rgba(194,208,224,.8)}
+.qw b{color:var(--chalk);font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:.78rem}
+.qa{font-size:.85rem;margin:0;color:var(--moss)}
+.qrow{display:flex;gap:.4rem;flex-wrap:wrap}
+body.stepping{padding-bottom:4.6rem}
+#stepBar{position:fixed;left:0;right:0;bottom:0;z-index:50;display:none;
+align-items:center;gap:.6rem;padding:.6rem .8rem;
+background:rgba(24,32,42,.97);border-top:1px solid var(--rule);
+backdrop-filter:blur(8px)}
+#stepBar .btn{margin:0;flex:none}
+.railwrap{flex:1;min-width:0;text-align:center}
+#stepRail{display:flex;gap:3px;justify-content:center;margin-bottom:.3rem}
+.sr{flex:1;max-width:2.2rem;background:none;border:0;padding:0;cursor:pointer}
+.sr span{display:block;height:3px;border-radius:2px;background:rgba(194,208,224,.22)}
+.sr.done span{background:rgba(132,176,150,.6)}
+.sr.on span{background:var(--lit);height:4px}
+#stepLabel{font-family:"Bricolage Grotesque",sans-serif;font-size:.72rem;
+color:rgba(194,208,224,.75);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+button:disabled{opacity:.35;cursor:default}
+.sb{font-family:"Bricolage Grotesque",sans-serif;font-size:.64rem;font-weight:800;
+padding:.3rem .5rem;border-radius:2px;align-self:center}
+.sb.none{background:rgba(194,208,224,.12);color:rgba(194,208,224,.7)}
+.sb.on{background:rgba(132,176,150,.22);color:var(--moss)}
+.sb.off{background:rgba(224,138,107,.2);color:var(--stop)}
+.deckstage{flex:1;display:flex;align-items:center;justify-content:center;padding:1.2rem;cursor:pointer;overflow:auto}
+.slide{max-width:34rem;width:100%}
+.slide.flag{border-left:3px solid var(--stop);padding-left:1rem}
+.dh{font-family:"Bricolage Grotesque",sans-serif;font-size:clamp(1.6rem,6vw,2.4rem);
+font-weight:800;color:var(--chalk);line-height:1.1;margin:0 0 .5rem}
+.ds{font-family:"Bricolage Grotesque",sans-serif;font-size:.85rem;color:var(--lit);
+font-weight:600;margin:0 0 1.2rem}
+.db{font-size:1.04rem;line-height:1.55;color:var(--glass);margin:0 0 .8rem}
+.df{margin:1.4rem 0 0;padding-top:.8rem;border-top:1px solid var(--rule);
+font-size:.88rem;color:rgba(194,208,224,.7)}
+.dlist{display:flex;flex-wrap:wrap;gap:.45rem;margin:.4rem 0}
+.dlist span{background:var(--pane);border-radius:2px;padding:.45rem .7rem;font-size:.92rem;color:var(--chalk)}
+.dlive{margin:.6rem 0}
+.dcard{background:var(--pane);border-radius:2px;padding:.7rem .8rem;margin-bottom:.5rem}
+.dbody{margin:0 0 .35rem;color:var(--chalk);font-size:.97rem}
+.dmeta{margin:0;font-size:.83rem;color:rgba(194,208,224,.75)}
+.decknav{display:flex;align-items:center;justify-content:center;gap:.6rem;
+padding:.7rem;border-top:1px solid var(--rule);font-size:.8rem;color:rgba(194,208,224,.7)}
+.decknav .btn{margin:0}
+/* overlays */
+.overlay{position:fixed;inset:0;z-index:60;background:rgba(17,23,31,.97);
+display:flex;flex-direction:column}
+.obar{display:flex;align-items:center;gap:.6rem;padding:.6rem .8rem;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.otitle{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;color:var(--chalk);font-size:.9rem;flex:1;min-width:8rem}
+.oclose{background:transparent;border:1px solid var(--rule);color:var(--glass);font-size:1rem;
+width:2rem;height:2rem;border-radius:2px;cursor:pointer;flex:none}
+.topo{display:flex;gap:.3rem;flex-wrap:wrap}
+.topo .tb{background:transparent;border:1px solid var(--rule);color:var(--glass);
+font-family:"Bricolage Grotesque",sans-serif;font-size:.72rem;font-weight:600;
+padding:.25rem .5rem;border-radius:2px;cursor:pointer}
+.topo .tb.on{border-color:var(--lit);background:rgba(242,193,78,.14);color:var(--chalk)}
+#threeCanvas{flex:1;min-height:0;position:relative}
+#threeCanvas canvas{display:block;touch-action:none}
+.ohint{text-align:center;font-size:.76rem;color:rgba(194,208,224,.55);padding:.4rem}
+.oinspect{position:absolute;left:.7rem;right:.7rem;bottom:2.6rem;background:var(--pane2);
+border-left:3px solid var(--lit);border-radius:2px;padding:.75rem;max-height:42vh;overflow:auto}
+.oinspect h3{font-size:.95rem;margin:0 0 .35rem;color:var(--chalk)}
+.oinspect p{font-size:.86rem;margin:0 0 .4rem}
+.oinspect .lbl{font-family:"Bricolage Grotesque",sans-serif;font-size:.62rem;font-weight:800;color:var(--lit);margin:0 0 .2rem}
+.nofall{padding:2rem 1.2rem;color:rgba(194,208,224,.85);font-size:.95rem}
+.nofall b{color:var(--chalk)}
+.contact{background:rgba(0,0,0,.26);border-radius:2px;padding:.5rem .6rem;margin:.4rem 0}
+.cline{margin:0 0 .22rem;font-size:.86rem}
+.cline b{color:var(--chalk);font-family:"Bricolage Grotesque",sans-serif;font-weight:600}
+.cline.dim{color:rgba(194,208,224,.65);font-size:.8rem}
+.cline.unver{color:var(--stop);font-size:.82rem}
+.mailbody{flex:1;overflow:auto;padding:1rem}
+.mailbody .lbl{font-family:"Bricolage Grotesque",sans-serif;font-size:.64rem;font-weight:800;
+letter-spacing:.04em;color:var(--lit);margin:.8rem 0 .25rem}
+.mline{color:var(--chalk);font-size:.92rem;margin:0}
+.mailbody pre{white-space:pre-wrap;font-size:.82rem}
+/* chat */
+.chatlog{flex:1;overflow:auto;padding:.9rem;display:flex;flex-direction:column;gap:.6rem}
+.msg{max-width:88%;padding:.6rem .75rem;border-radius:3px;font-size:.92rem;line-height:1.5}
+.msg.bot{background:var(--pane);border-left:2px solid var(--moss);align-self:flex-start;color:var(--glass)}
+.msg.me{background:rgba(242,193,78,.14);align-self:flex-end;color:var(--chalk)}
+.chatbar{display:flex;gap:.5rem;padding:.7rem .8rem;border-top:1px solid var(--rule)}
+.chatbar input{flex:1}
+.chatbar .btn{margin:0;flex:none}
+.chatchips{display:flex;gap:.4rem;flex-wrap:wrap;padding:0 .8rem .9rem}
+.chip{background:transparent;border:1px solid var(--rule);color:var(--glass);
+font-family:"Bricolage Grotesque",sans-serif;font-size:.74rem;font-weight:600;
+padding:.3rem .55rem;border-radius:2px;cursor:pointer}
+.chip:hover{border-color:var(--lit);color:var(--chalk)}
+/* repo stats */
+.stats{display:flex;gap:.5rem;flex-wrap:wrap}
+.stats div{flex:1;min-width:4.4rem;background:rgba(0,0,0,.24);border-radius:2px;padding:.5rem;text-align:center}
+.stats b{display:block;font-family:"Bricolage Grotesque",sans-serif;font-size:1.25rem;font-weight:800;color:var(--chalk)}
+.stats span{font-size:.72rem;color:rgba(194,208,224,.7)}
+.lbrow{display:flex;align-items:center;gap:.6rem;padding:.4rem 0;border-bottom:1px solid rgba(194,208,224,.1)}
+.lbrow .rk{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;color:var(--lit);width:1.2rem}
+.lbrow .nm{flex:1;color:var(--chalk);font-size:.9rem}
+.lbrow .ct{font-size:.8rem;color:rgba(194,208,224,.7)}
+.pnote{font-size:.85rem;color:rgba(194,208,224,.8);margin:.5rem 0 0}
+.pnote b{color:var(--chalk);font-family:"Bricolage Grotesque",sans-serif;font-weight:600}
+.flagbox{background:rgba(224,138,107,.12);border-left:2px solid var(--stop);padding:.55rem .7rem;
+border-radius:2px;margin:.6rem 0 0}
+.flagbox .lbl{font-family:"Bricolage Grotesque",sans-serif;font-size:.62rem;font-weight:800;
+letter-spacing:.04em;color:var(--stop);margin:0 0 .2rem}
+.flagbox p:last-child{margin:0;font-size:.86rem;color:var(--chalk)}
+.plan{background:rgba(0,0,0,.24);border:1px solid var(--rule);border-radius:3px;
+margin:.6rem 0 .5rem;padding:.4rem}
+.plan svg{display:block;width:100%;height:auto;max-height:70vh}
+.legend{display:flex;gap:.9rem;flex-wrap:wrap;font-size:.78rem;color:rgba(194,208,224,.7);margin-bottom:.6rem}
+.legend span{display:flex;align-items:center;gap:.3rem}
+.dot{width:.6rem;height:.6rem;border-radius:50%;display:inline-block}
+.dot.idea{background:#84B096}.dot.con{background:#E08A6B}
+.dot.org{background:#C2D0E0}.dot.prog{background:#F2C14E}
+.entry{display:flex;gap:.4rem;flex-wrap:wrap;margin:.8rem 0 1rem}
+.entry .tab{background:transparent;border:1px solid var(--rule);color:var(--glass);
+font-family:"Bricolage Grotesque",sans-serif;font-size:.82rem;font-weight:600;
+padding:.38rem .75rem;border-radius:2px;cursor:pointer}
+.entry .tab.on{border-color:var(--lit);background:rgba(242,193,78,.12);color:var(--chalk)}
+.qrbox{display:flex;gap:.8rem;align-items:center;background:rgba(0,0,0,.22);
+padding:.75rem;border-radius:3px;margin:.6rem 0}
+.qrfake{width:56px;height:56px;flex:none;border-radius:2px;background:
+linear-gradient(90deg,var(--chalk) 12%,transparent 12% 24%,var(--chalk) 24% 30%,transparent 30% 42%,var(--chalk) 42% 56%,transparent 56% 62%,var(--chalk) 62% 74%,transparent 74% 82%,var(--chalk) 82%),
+linear-gradient(0deg,var(--chalk) 10%,transparent 10% 22%,var(--chalk) 22% 34%,transparent 34% 44%,var(--chalk) 44% 54%,transparent 54% 66%,var(--chalk) 66% 78%,transparent 78% 88%,var(--chalk) 88%);
+background-blend-mode:multiply;opacity:.85}
+.hit{display:block;width:100%;text-align:left;background:rgba(0,0,0,.24);border:1px solid var(--rule);
+border-radius:2px;padding:.55rem .7rem;margin-top:.45rem;cursor:pointer;color:var(--glass);
+font-family:"Newsreader",serif;font-size:.9rem}
+.hit:hover{border-color:var(--lit)}
+.hit b{display:block;color:var(--chalk);font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:.92rem}
+.hit small{color:rgba(194,208,224,.65);font-size:.8rem}
+.hit.none{cursor:default;border-style:dashed}
+.hit.none:hover{border-color:var(--rule)}
+.drop{border:1px dashed var(--rule);border-radius:3px;padding:1.1rem;text-align:center;
+font-size:.86rem;color:rgba(194,208,224,.6);margin-top:.6rem;cursor:pointer}
+.drop.over{border-color:var(--moss);color:var(--chalk);background:rgba(132,176,150,.1)}
+.cx{font-family:"Bricolage Grotesque",sans-serif;font-size:.64rem;font-weight:800;
+padding:.15rem .4rem;border-radius:2px;white-space:nowrap}
+.cx.c1{background:rgba(132,176,150,.25);color:var(--moss)}
+.cx.c2{background:rgba(242,193,78,.2);color:var(--lit)}
+.cx.c3{background:rgba(224,138,107,.2);color:var(--stop)}
+.cx.c4{background:rgba(224,138,107,.32);color:#F2B49A}
+.cxn{font-size:.8rem;color:rgba(194,208,224,.75)}
+.lens{margin:.2rem 0 .8rem}
+.lens button{font-size:.78rem;padding:.28rem .6rem}
+.focusnote{font-size:.8rem;color:rgba(194,208,224,.65);margin:0 0 .5rem;padding-bottom:.4rem;
+border-bottom:1px solid rgba(194,208,224,.12)}
+.vote{display:flex;gap:.4rem;margin-top:.5rem}
+.vote button{flex:1;background:transparent;border:1px solid var(--rule);color:var(--glass);
+font-size:.83rem;font-weight:600;padding:.38rem;border-radius:2px;cursor:pointer}
+.vote button.yes.on{border-color:var(--moss);background:rgba(132,176,150,.2);color:var(--chalk)}
+.vote button.no.on{border-color:var(--stop);background:rgba(224,138,107,.18);color:var(--chalk)}
+
+/* inputs */
+textarea,input[type=text]{width:100%;background:rgba(0,0,0,.28);border:1px solid var(--rule);
+border-radius:2px;color:var(--chalk);padding:.65rem;font-family:"Newsreader",serif;font-size:.95rem;line-height:1.5}
+textarea{min-height:4.5rem;resize:vertical}
+label.ck{display:flex;gap:.45rem;align-items:center;font-size:.85rem;margin:.55rem 0}
+.btn{background:transparent;border:1px solid var(--lit);color:var(--lit);font-size:.86rem;
+font-weight:600;padding:.45rem .9rem;border-radius:2px;cursor:pointer;margin-top:.5rem}
+.btn:hover{background:var(--lit);color:var(--dusk)}
+.btn.sec{border-color:var(--rule);color:var(--glass)}
+.btn.sec:hover{background:var(--rule);color:var(--chalk)}
+.row{display:flex;gap:.5rem;flex-wrap:wrap}
+
+/* response */
+.resp{border-left:3px solid var(--lit);background:var(--pane2);padding:.9rem;border-radius:2px;margin-top:.9rem}
+.resp h3{font-size:.9rem;color:var(--chalk);margin:0 0 .5rem;font-weight:600}
+.resp .grp{margin:0 0 .75rem}
+.resp .lbl{font-family:"Bricolage Grotesque",sans-serif;font-size:.68rem;font-weight:800;
+letter-spacing:.03em;color:var(--lit);margin:0 0 .25rem}
+.resp ul{margin:0;padding-left:1.05rem;font-size:.9rem}
+.resp li{margin-bottom:.35rem}
+.resp .unknown{color:var(--stop)}
+pre{margin:.5rem 0 0;padding:.75rem;background:rgba(0,0,0,.35);border-radius:2px;overflow-x:auto;
+font-family:ui-monospace,Menlo,monospace;font-size:.72rem;line-height:1.5;white-space:pre-wrap;color:var(--glass)}
+.res{font-size:.87rem;margin-bottom:.45rem}
+.res b{color:var(--chalk);font-family:"Bricolage Grotesque",sans-serif;font-weight:600}
+hr{border:0;border-top:1px solid var(--rule);margin:1.6rem 0}
+</style>
+<script type="application/ld+json" id="agentManifest">
+{"@context":"https://schema.org","@type":"Dataset","name":"Plant an Idea — 225 Bush Street",
+"description":"Civic coordination graph for one vacant ground-floor retail parcel. Ideas, agreement, constraints, and who answers them.",
+"creator":{"@type":"Person","name":"Michael Lopez","url":"https://innercartography.one"},
+"spatialCoverage":{"@type":"Place","address":"225 Bush Street, San Francisco, CA 94104"},
+"potentialAction":{"@type":"SearchAction","description":"Call window.PlantAnIdea.match(interests) to rank ideas, or window.PlantAnIdea.state() for the full graph."}}
+</script>
+</head>
+<body>
+<div class="wrap">
+
+<p class="sub" style="margin-bottom:.4rem"><a href="/hyperblogs/plant-an-idea/">← Back to the essay</a></p>
+<h1>Plant an Idea</h1>
+<p class="sub">Parcel prototype · Building for SF · one place, one graph</p>
+
+<div class="card key" id="scanGate">
+  <h2><span class="n">00</span> Which space are you standing in front of?</h2>
+  <p>We are standing across from the vacant ground-floor retail at 225 Bush. Three ways in — any of them pulls the parcel record.</p>
+
+  <div class="entry">
+    <button class="tab on" data-t="qr">Scan the QR</button>
+    <button class="tab" data-t="addr">Enter an address</button>
+    <button class="tab" data-t="scan">Upload a scan</button>
+  </div>
+
+  <div class="pane" id="pane-qr">
+    <p><small>A sticker beside the "Retail Space Available" sign in the window at 225 Bush. Scanning it opens this page with the parcel already loaded.</small></p>
+    <div class="qrbox">
+      <div class="qrfake" aria-hidden="true"></div>
+      <div>
+        <p style="margin:0 0 .3rem"><b style="color:var(--chalk)">Sticker in the window</b></p>
+        <p style="margin:0"><small>Encodes the block and lot. No app, no account.</small></p>
+      </div>
+    </div>
+    <button class="btn" id="goQr">Simulate scanning it</button>
+  </div>
+
+  <div class="pane" id="pane-addr" style="display:none">
+    <p><small>Type the street address. Matches against the parcel list, then pulls the record.</small></p>
+    <input type="text" id="addrIn" placeholder="e.g. 225 Bush St" autocomplete="off">
+    <div id="addrHits"></div>
+    <p style="margin:.5rem 0 0"><small>Nothing matching? <button class="edit" id="manualEntry">Enter the parcel facts by hand</button> — the tool only ever cites what's in that record.</small></p>
+  </div>
+
+  <div class="pane" id="pane-scan" style="display:none">
+    <p><small>A Gaussian splat or photo set of the space. Capture metadata carries the location, which resolves to the parcel.</small></p>
+    <input type="text" id="scanIn" placeholder="Paste a scan URL, or drop a file below">
+    <div class="drop" id="drop">Drop a scan or photo here</div>
+    <div id="scanOut"></div>
+  </div>
+</div>
+
+<div id="afterScan" style="display:none">
+
+<div class="card key">
+  <h2><span class="n">01</span> The parcel</h2>
+  <p style="margin:0 0 .5rem"><small id="howLoaded"></small></p>
+  <div id="parcelBox"></div>
+  <div class="nest">
+    <span>City</span><i>›</i><span id="nDist">District</span><i>›</i><span id="nBlock">Block</span><i>›</i><span class="here" id="nParcel">This parcel</span>
+  </div>
+  <button class="edit" id="editParcel">Edit parcel facts</button>
+  <div id="parcelEdit" style="display:none;margin-top:.7rem">
+    <p><small>Everything the response cites comes from here. Nothing is invented.</small></p>
+    <textarea id="parcelJson" spellcheck="false"></textarea>
+    <button class="btn" id="saveParcel">Save facts</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2><span class="n">02</span> Who are you?</h2>
+  <p><small>One tap. It decides which next steps you get shown, and lets the system see whether an idea has support across different kinds of people.</small></p>
+  <div class="roles" id="roles"></div>
+</div>
+
+<div class="card key">
+  <h2><span class="n">03</span> 225 Bush · master repo</h2>
+  <p><small>Every idea here is its own repo. This parcel is the master. Issues are the open questions; a commit is an answer somebody went and found.</small></p>
+  <div id="repoStats"></div>
+  <div class="row" style="margin-top:.6rem">
+    <button class="btn sec tiny" id="showBoard">Contributors</button>
+    <button class="btn sec tiny" id="open3d">3D graph</button>
+    <button class="btn sec tiny" id="openDeck">Present</button>
+    <button class="btn sec tiny" id="openAgent">Agent view</button>
+    <button class="btn sec tiny" id="toggleStep">Scroll view</button>
+    <span class="sb none" id="sbBadge">local only</span>
+  </div>
+  <div id="board" style="display:none;margin-top:.8rem"></div>
+</div>
+
+<div class="card go">
+  <h2><span class="n">04</span> Ideas growing in this space</h2>
+  <p><small>Not a vote tally. Where each idea actually is, what it needs next, and who is carrying it.</small></p>
+  <div class="roles lens" id="lens">
+    <button data-l="public" class="on">Public view</button>
+    <button data-l="owner">Owner view</button>
+    <button data-l="policy">Policy view</button>
+  </div>
+  <div id="ideas"></div>
+</div>
+
+<div class="card">
+  <h2><span class="n">05</span> Plant an idea</h2>
+  <textarea id="newIdea" placeholder="What belongs in this space?"></textarea>
+  <label class="ck"><input type="checkbox" id="relayed"> I'm entering this on someone else's behalf</label>
+  <div class="row">
+    <button class="btn" id="plant">Plant it</button>
+    <button class="btn sec" id="checkOnly">Just check feasibility</button>
+  </div>
+  <div id="response"></div>
+  <div class="resp" id="placement" style="display:none"></div>
+</div>
+
+<div class="card">
+  <h2><span class="n">06</span> The graph, in the room</h2>
+  <p><small>Every idea sits on an actual surface. Tap one to see what it's wired to. Tap a constraint to see which other ideas hit the same wall.</small></p>
+  <div class="plan">
+    <svg id="graphSvg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+  <div class="legend">
+    <span><i class="dot idea"></i>idea</span>
+    <span><i class="dot con"></i>constraint</span>
+    <span><i class="dot org"></i>who answers it</span>
+    <span><i class="dot prog"></i>money</span>
+  </div>
+  <div id="inspector" class="resp" style="display:none"></div>
+  <button class="btn sec tiny" id="showLists">Show the source lists</button>
+  <div id="graphList" style="display:none;margin-top:.8rem"></div>
+</div>
+
+<div class="card warn">
+  <h2><span class="n">07</span> Export</h2>
+  <p><small>Nothing persists on its own. Export before closing the tab.</small></p>
+  <button class="btn" id="export">Export all data as JSON</button>
+  <pre id="exportOut" style="display:none"></pre>
+</div>
+
+</div>
+</div>
+<div id="threeWrap" class="overlay" style="display:none">
+  <div class="obar">
+    <span class="otitle">225 Bush · spatial knowledge graph</span>
+    <span class="topo">
+      <button class="tb on" data-topo="centralized">◉ Centralized</button>
+      <button class="tb" data-topo="decentralized">◈ Decentralized</button>
+      <button class="tb" data-topo="distributed">◇ Distributed</button>
+    </span>
+    <button class="oclose" id="close3d">✕</button>
+  </div>
+  <div id="threeCanvas"></div>
+  <div class="ohint" id="threeHint">Drag to rotate · scroll to zoom · tap a node</div>
+  <div class="oinspect" id="threeInspect" style="display:none"></div>
+</div>
+
+<div id="stepBar">
+  <button class="btn sec tiny" id="stepPrev">← Back</button>
+  <div class="railwrap"><div id="stepRail"></div><span id="stepLabel"></span></div>
+  <button class="btn tiny" id="stepNext">Next →</button>
+</div>
+
+<div id="agentWrap" class="overlay" style="display:none">
+  <div class="obar"><span class="otitle">Agent view</span>
+  <button class="oclose" id="closeAgent">✕</button></div>
+  <div class="mailbody" id="agentBody"></div>
+</div>
+
+<div id="deckWrap" class="overlay" style="display:none">
+  <div class="deckstage" id="deckStage"></div>
+  <div class="decknav">
+    <button class="btn sec tiny" id="deckPrev">←</button>
+    <span id="deckNum">1 / 1</span>
+    <button class="btn sec tiny" id="deckNext">→</button>
+    <button class="btn sec tiny" id="deckClose">✕</button>
+  </div>
+</div>
+
+<div id="mailWrap" class="overlay" style="display:none">
+  <div class="obar"><span class="otitle" id="mailTitle">draft</span>
+  <button class="oclose" id="closeMail">✕</button></div>
+  <div class="mailbody" id="mailBody"></div>
+</div>
+
+<div id="chatWrap" class="overlay" style="display:none">
+  <div class="obar">
+    <span class="otitle" id="chatTitle">idea</span>
+    <button class="oclose" id="closeChat">✕</button>
+  </div>
+  <div class="chatlog" id="chatLog"></div>
+  <div class="chatbar">
+    <input type="text" id="chatIn" placeholder="Ask this idea anything — what's blocking it, who to call, how much">
+    <button class="btn" id="chatSend">Ask</button>
+  </div>
+  <div class="chatchips" id="chatChips"></div>
+</div>
+
+<script>
+/* ============================================================
+   PARCEL — fill this in with real data before the demo.
+   Every citation in a response comes from this object only.
+   ============================================================ */
+/* Known parcels. Add real ones here — this is the lookup the three entry
+   paths resolve against. Fill in from the Property Information Map. */
+var PARCELS = [
+  {
+    address: "225 Bush Street",
+    common_name: "the old Standard Oil Building, corner of Bush & Sansome",
+    district: "Financial District — VERIFY supervisor district on the Property Information Map",
+    block_lot: "VERIFY on the Property Information Map",
+    zoning_district: "VERIFY on PIM — Financial District, likely a C-3 downtown district",
+    ground_floor_sqft: "one full floor of retail in the building; VERIFY the size of this specific unit",
+    building: "Built 1922, George W. Kelham, for John D. Rockefeller. Renovated 2020. 22 stories, 585,448 sf rentable, 26,000 sf floor plates. Tallest building in San Francisco 1922–1925.",
+    vacant_since: "VERIFY — retail unit currently marketed by Newmark",
+    owner_entity: "In transition. A $350M first mortgage went into maturity default in Nov 2024; a CMBS trust has been selling the loan through JLL and the listing showed Under Contract as of Aug 5, 2026. Building occupancy 57%.",
+    last_known_use: "Ground-floor retail. VERIFY the prior tenant and closing date",
+    retail_broker: "Newmark (nmrk.com) — sign in the window",
+    permit_notes: [
+      "VERIFY — pull permit history for this block/lot on the Property Information Map",
+      "Building renovated 2020, so some systems may already be closer to current code than the 1922 date suggests"
+    ],
+    known_constraints: [
+      "Historic building. VERIFY its Article 11 designation status on PIM before assuming what facade or interior work is allowed.",
+      "Ownership is mid-transaction, so there may be no counterparty able to sign anything right now.",
+      "JLL's own investment highlights name activation of the ground floor as a repositioning opportunity."
+    ],
+    /* Constraints that apply to ANY idea here, regardless of use. */
+    always: ["ownership","historic"],
+    sources: [
+      {name:"SF Property Information Map — zoning, block/lot, permits", url:"https://sfplanninggis.org/pim/"},
+      {name:"DataSF — permit and business registration history", url:"https://datasf.org/opendata/"},
+      {name:"JLL loan sale listing (Under Contract, Aug 2026)", url:"https://invest.jll.com/us/en/listings/office/225-bush-street"},
+      {name:"Newmark retail listing", url:"https://www.nmrk.com/properties/225-bush-street-san-francisco-lease"},
+      {name:"Building history", url:"https://en.wikipedia.org/wiki/225_Bush_Street"}
+    ]
+  }
+];
+
+/* Active parcel. Set by whichever entry path the user takes. */
+var PARCEL = JSON.parse(JSON.stringify(PARCELS[0]));
+
+/* ============================================================
+   SUPABASE — paste your project URL and PUBLISHABLE (anon) key.
+   The anon key is designed to live in client code. Never put the
+   service_role key here. Leave blank to run fully in-memory.
+   ============================================================ */
+var SUPABASE_URL = "";           // e.g. https://xxxx.supabase.co
+var SUPABASE_ANON_KEY = "";      // publishable / anon key only
+var SB_OK = false;
+
+function sbHeaders(){
+  return {"apikey":SUPABASE_ANON_KEY,
+          "Authorization":"Bearer "+SUPABASE_ANON_KEY,
+          "Content-Type":"application/json",
+          "Prefer":"return=representation"};
+}
+function sbReady(){ return !!(SUPABASE_URL && SUPABASE_ANON_KEY); }
+
+/* Fire-and-forget writes. The UI never waits on the network. */
+function sbInsert(table, row){
+  if(!sbReady()) return Promise.resolve(null);
+  return fetch(SUPABASE_URL+"/rest/v1/"+table, {method:"POST", headers:sbHeaders(), body:JSON.stringify(row)})
+    .then(function(r){ SB_OK=r.ok; sbBadge(); return r.ok?r.json():null })
+    .catch(function(){ SB_OK=false; sbBadge(); return null });
+}
+function sbLoad(table, query){
+  if(!sbReady()) return Promise.resolve(null);
+  return fetch(SUPABASE_URL+"/rest/v1/"+table+(query||""), {headers:sbHeaders()})
+    .then(function(r){ SB_OK=r.ok; sbBadge(); return r.ok?r.json():null })
+    .catch(function(){ SB_OK=false; sbBadge(); return null });
+}
+function sbBadge(){
+  var el=document.getElementById('sbBadge'); if(!el) return;
+  el.textContent = !sbReady() ? 'local only' : (SB_OK?'synced':'offline');
+  el.className = 'sb '+(!sbReady()?'none':(SB_OK?'on':'off'));
+}
+
+/* SQL to create the tables — see the Agent view for the full schema. */
+var SB_SCHEMA = [
+"create table parcels (id text primary key, address text, district text, block_lot text,",
+"  zoning text, owner_note text, record jsonb, updated_at timestamptz default now());",
+"",
+"create table ideas (id bigserial primary key, parcel_id text references parcels(id),",
+"  body text not null, stage int default 0, cons text[], anchor jsonb,",
+"  relayed bool default false, created_at timestamptz default now());",
+"",
+"create table reactions (id bigserial primary key, idea_id bigint references ideas(id),",
+"  voter text, role text, value text check (value in ('agree','disagree','pass')),",
+"  created_at timestamptz default now());",
+"",
+"create table questions (id bigserial primary key, idea_id bigint references ideas(id),",
+"  q text, mode text check (mode in ('online','call')), status text default 'open',",
+"  where_to_look text, url text, who text, ask text,",
+"  answer text, answered_by text, source text, asserted_at timestamptz, tier text);",
+"",
+"-- every fact carries where it came from and when",
+"create table facts (id bigserial primary key, parcel_id text, subject text, claim text,",
+"  source text, source_url text, tier text check (tier in ('pull','push','community')),",
+"  asserted_at timestamptz default now(), superseded_by bigint);"
+].join("\n");
+
+/* ============================================================
+   GRAPH — agencies, programs, constraint types.
+   Sourced from the Sept 11 presentations + city program pages.
+   ============================================================ */
+var GRAPH = {
+  resources: [
+    {name:"SF Property Information Map", what:"Zoning district, block/lot, permit history, use restrictions per parcel", url:"https://sfplanninggis.org/pim/"},
+    {name:"DataSF", what:"Open datasets behind the map — permits, business registrations, land use", url:"https://datasf.org/opendata/"},
+    {name:"CivLab Republic", what:"Neighborhood-selectable dashboard pulling permits, events, civic data", url:"https://republic.civlab.org/"}
+  ],
+  agencies: [
+    {id:"oewd", name:"Office of Economic & Workforce Development", handles:"Storefront grants, vacancy programs, downtown activation", ask:"Which grant program fits this use and this parcel?", phone:"415-554-6134", email:"sfosb@sfgov.org", addr:"City Hall, 1 Dr Carlton B. Goodlett Pl, Rm 448", note:"Routed via the Office of Small Business, the city's central point of contact. Commercial Leasing Specialists sit here.", verified:true},
+    {id:"planning", name:"SF Planning", handles:"Zoning districts, permitted use types, conditional use authorization, historic preservation review", ask:"Is this use principally permitted here, or does it need a CU?", phone:"628-652-7600", email:"pic@sfgov.org", addr:"49 South Van Ness Ave, Ste 1400 · Planning Counter, 2nd floor, 628-652-7300", note:"Ask for a Historic Preservation Specialist for any structure 45 years or older. 225 Bush is from 1922.", verified:true},
+    {id:"dbi", name:"Dept. of Building Inspection", handles:"Building permits, code upgrades triggered by change of use", ask:"What upgrades would a change of use trigger in this building?", phone:"415-831-5500", email:"dbicustomerservice@sfgov.org", addr:"Permit Center, 49 South Van Ness Ave", note:"Call centre is Mon–Fri 10am–2pm. Technical questions go to techq@sfgov.org.", verified:true},
+    {id:"fire", name:"SF Fire Dept.", handles:"Fire suppression, occupancy load, life safety for assembly uses", ask:"What occupancy load and suppression would this use require?", phone:null, email:null, lookup:"https://www.sf.gov/", verified:false},
+    {id:"health", name:"Dept. of Public Health", handles:"Food facility permits, plan review for food service", ask:"What does a food permit require in a space with this last use?", phone:null, email:null, lookup:"https://www.sf.gov/", verified:false},
+    {id:"abc", name:"CA Dept. of Alcoholic Beverage Control", handles:"Alcohol licenses, license availability by census tract", ask:"Is a license type available in this tract, or is it a transfer?", phone:null, email:null, lookup:"https://www.abc.ca.gov/", verified:false},
+    {id:"smallbiz", name:"Office of Small Business / Permit Center", handles:"PermitSF, permit sequencing, first-stop guidance", ask:"What is the permit sequence for this use, and what comes first?", phone:"415-554-6134", email:"sfosb@sfgov.org", addr:"City Hall Rm 140, and the Permit Center at 49 South Van Ness", note:"The city's central point of information for small business. Start here if you do not know who to ask.", verified:true},
+    {id:"sfnd", name:"SF New Deal — Vacant to Vibrant", handles:"Pop-up placement, standard lease, insurance, city coordination", ask:"Could this parcel host a pop-up under the current program round?", phone:null, email:null, lookup:"https://www.sfnewdeal.org/", verified:false},
+    {id:"cjf", name:"Civic Joy Fund", handles:"Events, block parties, activations, leadership cohort", ask:"Does this belong in the Organize / Navigate / Build track?", phone:null, email:null, lookup:"https://www.sf.gov/", verified:false},
+    {id:"supe", name:"District Supervisor's office", handles:"Neighborhood priorities, legislation, stuck-process escalation", ask:"Is there district support for a use like this here?", phone:null, email:null, lookup:"https://sfbos.org/", verified:false}
+  ],
+  programs: [
+    {id:"sog", name:"Storefront Opportunity Grant", amount:"$50k–$100k", what:"Helps a small business open in a vacant space", agency:"oewd"},
+    {id:"shines", name:"SF Shines", amount:"up to $20k", what:"Facade awards plus equipment grants", agency:"oewd"},
+    {id:"ada", name:"ADA Accessibility Grants", amount:"varies", what:"Offsets accessibility upgrade costs for small businesses", agency:"oewd"},
+    {id:"legacy", name:"Legacy Business Registry", amount:"varies", what:"For businesses 30+ years old with cultural contribution", agency:"oewd"},
+    {id:"v2v", name:"Vacant to Vibrant", amount:"$2k–$10k activator; up to $5k owner TI", what:"Pop-ups up to six months in vacant storefronts", agency:"sfnd"},
+    {id:"v2vm", name:"Vacant to Vibrant Marketplace (2026)", amount:"varies", what:"Shared retail environments, multiple businesses under one roof", agency:"sfnd"},
+    {id:"dbf", name:"Downtown Business Fund (2026)", amount:"significant", what:"Funds costly tenant improvements to make complex spaces viable", agency:"sfnd"},
+    {id:"p2p", name:"Pop-up to Permanent", amount:"varies", what:"Supports a successful pop-up moving to a long-term lease", agency:"sfnd"}
+  ],
+  /* Constraint types. Each carries an ONLINE step and a CALL step.
+     Do the online step first. The call is only earned once online runs out. */
+  constraints: {
+    ownership: {label:"Is there anyone who can actually say yes right now?", detail:"The loan on this building went into maturity default and the note has been changing hands. A trust in workout usually cannot sign a creative ground-floor lease. This is the barrier OEWD called an unmotivated owner — here it is structural, not personal.",
+      online:{what:"Check the JLL loan-sale listing status and any recorded transfer documents — ownership status is public before you call anyone", url:"https://invest.jll.com/us/en/listings/office/225-bush-street"},
+      call:{agency:null, ask:"Ask the retail broker at Newmark: who has authority to approve a short-term or unconventional ground-floor use while the note is in transition, and when does that change?"}},
+    historic: {label:"It's a 1922 landmark — what can you actually touch?", detail:"Built for Rockefeller by George W. Kelham and marketed as an iconic landmark. Facade and significant interior alterations in a historic downtown building get preservation review, which is a real timeline.",
+      online:{what:"Look up this building's historic designation status on the Property Information Map before assuming any facade or interior change is possible", url:"https://sfplanninggis.org/pim/"},
+      call:{agency:"planning", ask:"What is this building's historic designation status, and what level of preservation review would a ground-floor tenant improvement trigger?"}},
+    cu: {label:"Is this use even permitted here?", detail:"If it is not principally permitted in this zoning district, a conditional use adds timeline and approval uncertainty.",
+      online:{what:"Look up the zoning district on the Property Information Map, then find this use in the Planning Code use table for that district", url:"https://sfplanninggis.org/pim/"},
+      call:{agency:"planning", ask:"This use looks like it needs a CU in this district — what is the realistic timeline and what triggers a hearing?"}},
+    code: {label:"What upgrades would a change of use trigger?", detail:"New tenancy or change of use can require ADA, fire suppression and life-safety upgrades to current code.",
+      online:{what:"Pull the permit history for this block/lot — past permits tell you what has already been brought to code", url:"https://sfplanninggis.org/pim/"},
+      call:{agency:"dbi", ask:"For this address and this proposed use, what upgrades would be triggered? Is there a pre-application review?"}},
+    insurance: {label:"Would occupancy change the owner's insurance?", detail:"Named by OEWD as a live reason owners hesitate. The owner's carrier decides this, not the city.",
+      online:null,
+      call:{agency:null, ask:"Ask the owner or broker directly: would this use change your carrier's position, and do you know by how much?"}},
+    ti: {label:"Who pays for the build-out?", detail:"How tenant improvement cost splits between owner and tenant is a common failure point before anything gets signed.",
+      online:{what:"Check which TI programs this parcel could stack — Vacant to Vibrant owner TI, Downtown Business Fund, SF Shines", url:"https://www.sfnewdeal.org/"},
+      call:{agency:"oewd", ask:"Can TI support from more than one program be stacked on the same space?"}},
+    grandfather: {label:"Do the previous tenant's approvals carry over?", detail:"Usually not. A new food tenant is typically not grandfathered under the prior operator's approvals.",
+      online:{what:"Read the permit and business registration history for this address — what the last operator held tells you what you would have to re-earn", url:"https://datasf.org/opendata/"},
+      call:{agency:"health", ask:"The prior use here was similar — what carries over and what has to be re-permitted?"}},
+    assembly: {label:"How many people can legally be in the room?", detail:"Gathering uses raise occupancy load, egress and suppression requirements.",
+      online:{what:"Square footage divided by the occupancy load factor for assembly gives you a rough ceiling before you ask anyone", url:"https://sfplanninggis.org/pim/"},
+      call:{agency:"fire", ask:"At this square footage and this use, what occupancy load and suppression would you require?"}},
+    food: {label:"What does food service actually require here?", detail:"Food facility permit and plan review, plus grease, ventilation and plumbing depending on the build.",
+      online:{what:"Read the DPH food facility plan review requirements and checklist before designing anything", url:"https://www.sf.gov/"},
+      call:{agency:"health", ask:"Given the last use here, what level of plan review does this need?"}},
+    alcohol: {label:"Is an alcohol license even available?", detail:"License type may be unavailable in this census tract, which makes it a transfer purchase rather than a new issue.",
+      online:{what:"Query ABC's license database by address or census tract — availability is public before you talk to anyone", url:"https://www.abc.ca.gov/"},
+      call:{agency:"abc", ask:"Is the license type I need available in this tract, or am I looking at a transfer?"}},
+    water: {label:"Can the building handle a wet use?", detail:"Bathing, spa and heavy-water uses need drainage, waterproofing and often structural review.",
+      online:{what:"Permit history will show whether plumbing or structural work has been done here before", url:"https://sfplanninggis.org/pim/"},
+      call:{agency:"dbi", ask:"For a wet use at this address, what structural and drainage review would be required?"}},
+    overnight: {label:"Does anyone sleep here?", detail:"Overnight occupancy moves this out of retail entirely, into a much longer approval path.",
+      online:{what:"Check the Planning Code use table — residential and group housing are separate use categories from retail", url:"https://sfplanninggis.org/pim/"},
+      call:{agency:"planning", ask:"What use classification would this fall under, and is it allowed in this district at all?"}}
+  },
+  /* Keyword routing. Deliberately shallow and readable. */
+  tags: [
+    {match:["cafe","coffee","restaurant","food","kitchen","bakery","eat","grocery","market"],
+     tag:"food", constraints:["food","grandfather","code","ti"], programs:["sog","v2v","dbf"], orgs:["health","smallbiz","sfnd"]},
+    {match:["bar","beer","wine","alcohol","cocktail","brewery","taproom"],
+     tag:"alcohol", constraints:["alcohol","cu","food","code"], programs:["sog"], orgs:["abc","planning","smallbiz"]},
+    {match:["bathhouse","sauna","spa","bath","shower","soak","plunge","steam"],
+     tag:"wet", constraints:["water","cu","code","insurance"], programs:["dbf"], orgs:["dbi","planning","oewd"]},
+    {match:["gallery","theater","performance","music","venue","stage","club","event","gathering","assembly"],
+     tag:"assembly", constraints:["assembly","cu","code"], programs:["v2v"], orgs:["fire","planning","cjf"]},
+    {match:["studio","maker","ceramics","woodshop","workshop","fabrication","repair"],
+     tag:"maker", constraints:["code","ti"], programs:["v2v","sog"], orgs:["smallbiz","sfnd"]},
+    {match:["shop","retail","store","boutique","pop-up","popup","vendor","stall"],
+     tag:"retail", constraints:["ti","code"], programs:["v2v","v2vm","sog","shines"], orgs:["sfnd","oewd"]},
+    {match:["gym","fitness","yoga","pilates","climbing","dance"],
+     tag:"fitness", constraints:["code","assembly","ti"], programs:["sog"], orgs:["dbi","smallbiz"]},
+    {match:["childcare","daycare","preschool","kids","children"],
+     tag:"childcare", constraints:["cu","code","assembly"], programs:["sog"], orgs:["planning","dbi"]},
+    {match:["clinic","health","wellness","therapy","counseling","recovery","respite","care"],
+     tag:"care", constraints:["cu","code","insurance"], programs:["sog","dbf"], orgs:["planning","oewd","supe"]},
+    {match:["shelter","housing","sleep","beds","overnight","hostel","dorm"],
+     tag:"overnight", constraints:["overnight","cu","code"], programs:[], orgs:["planning","supe"]},
+    {match:["library","community","commons","free","nonprofit","hub","resource center","lockers","storage"],
+     tag:"community", constraints:["code","ti","insurance"], programs:["v2v","dbf"], orgs:["oewd","cjf","supe"]}
+  ]
+};
+
+/* Which questions each role is actually positioned to move. */
+var ROLE_FOCUS = {
+  "Resident on this block": {modes:["online"], wants:"things you can look up or ask about yourself"},
+  "Business owner":         {modes:["online","call"], wants:"permits, money, and what the build-out really costs"},
+  "Works downtown":         {modes:["online"], wants:"quick lookups on a lunch break"},
+  "Property side":          {modes:["call"], wants:"insurance, lease structure, and what a tenant would trigger"},
+  "Visiting":               {modes:["online"], wants:"anything answerable from a phone"},
+  "Skip":                   {modes:["online","call"], wants:"everything"}
+};
+/* Constraints weighted by how much they actually slow a project down. */
+var WEIGHT = {ownership:5, historic:4, overnight:5, cu:4, water:4, alcohol:3, assembly:3, code:3, grandfather:2, food:2, ti:2, insurance:1};
+
+function complexity(consKeys){
+  var s=0; consKeys.forEach(function(k){ s+=(WEIGHT[k]||1) });
+  if(s<=4)  return {score:s, band:"Light lift",  cls:"c1", note:"Mostly lookups. Could plausibly move in weeks."};
+  if(s<=8)  return {score:s, band:"Real work",   cls:"c2", note:"Several agencies involved. Months, not weeks."};
+  if(s<=13) return {score:s, band:"Heavy lift",  cls:"c3", note:"Needs a motivated owner and probably a conditional use."};
+  return     {score:s, band:"Different animal", cls:"c4", note:"This changes the use category. Long path, but not a no."};
+}
+
+var LENS='public';
+
+var ROLES = ["Resident on this block","Business owner","Works downtown","Property side","Visiting","Skip"];
+
+var STAGES = ["Planted","Has support","Facts gathered","Human confirmed","Test scheduled","Running"];
+
+/* Each idea carries its own open questions. A question is either answerable
+   ONLINE (do it now, yourself) or needs a CALL (only once online runs out). */
+var STATE = {role:null, nextId:100, ideas:[
+  {id:1, cons:["ownership","historic","ti","code"], anchor:{x:50,z:52,surface:"main floor"}, body:"Shared marketplace — several small vendors under one roof instead of one big tenant",
+   stage:2, relayed:false, tenders:["Michael L.","Ana (resident)","Dev (operator)"],
+   agree:14, no:1, groups:3,
+   questions:[
+     {q:"Is a shared-tenancy retail use permitted in this zoning district?", mode:"online", status:"resolved",
+      where:"Property Information Map — zoning district, then Planning Code use table", url:"https://sfplanninggis.org/pim/",
+      answer:"Retail is principally permitted. Multiple concurrent operators is a lease structure question, not a zoning one.", by:"Ana"},
+     {q:"Does Vacant to Vibrant Marketplace cover a space this size?", mode:"online", status:"resolved",
+      where:"SF New Deal program page — 2026 round", url:"https://www.sfnewdeal.org/",
+      answer:"Marketplace round is explicitly for shared retail with multiple businesses under one roof. Size fits.", by:"Michael L."},
+     {q:"Who carries the master lease and the insurance liability?", mode:"call", status:"working",
+      who:"sfnd", ask:"In a shared-tenancy pop-up, does a third-party leaseholder carry the master lease, and who holds insurance?", by:"Dev"},
+     {q:"Would the owner entertain a 3-year term with a shared operator?", mode:"call", status:"open",
+      who:null, ask:"Ask the broker directly: is ownership open to a multi-operator tenant on a 3-year term?"}
+   ]},
+  {id:2, cons:["ownership","historic","food","grandfather","code","ti"], anchor:{x:52,z:20,surface:"back wall"}, body:"Evening food hall with a community kitchen available during the day",
+   stage:1, relayed:false, tenders:["Priya K."],
+   agree:9, no:3, groups:2,
+   questions:[
+     {q:"Do the previous restaurant's approvals carry over?", mode:"online", status:"resolved",
+      where:"Permit and business registration history for this block/lot", url:"https://datasf.org/opendata/",
+      answer:"They do not. New operator re-permits. Prior hood and grease infrastructure may still be in place though — worth confirming on site.", by:"Priya K."},
+     {q:"What level of DPH plan review does a shared commercial kitchen need?", mode:"online", status:"open",
+      where:"DPH food facility plan review checklist", url:"https://www.sf.gov/"},
+     {q:"Is a shared kitchen one permit or one per operator?", mode:"call", status:"open",
+      who:"health", ask:"For a shared commercial kitchen with rotating operators, is that one facility permit or one per operator?"}
+   ]},
+  {id:3, cons:["ownership","historic","water","cu","code","insurance"], anchor:{x:17,z:38,surface:"north wall"}, body:"Public restrooms, lockers and showers open to anyone on the block",
+   stage:1, relayed:true, tenders:["relayed by volunteer","Marcus T."],
+   agree:11, no:2, groups:3,
+   questions:[
+     {q:"Can the building handle a wet use?", mode:"online", status:"open",
+      where:"Permit history — has plumbing or structural work been done here before?", url:"https://sfplanninggis.org/pim/"},
+     {q:"Is there an existing SF program funding public hygiene facilities?", mode:"online", status:"open",
+      where:"Search city program pages and DataSF for existing hygiene siting", url:"https://datasf.org/opendata/"},
+     {q:"What structural and drainage review would DBI require?", mode:"call", status:"open",
+      who:"dbi", ask:"For a wet use at this address, what structural and drainage review would be required?"}
+   ]},
+  {id:4, cons:["ownership","historic","assembly","cu","code","ti"], anchor:{x:80,z:70,surface:"corner by the glass"}, body:"Ceramics and repair studio with open workshop hours",
+   stage:0, relayed:false, tenders:[],
+   agree:6, no:1, groups:1,
+   questions:[
+     {q:"Does open workshop hours make this an assembly use?", mode:"online", status:"open",
+      where:"Square footage divided by assembly occupancy load factor gives a rough ceiling", url:"https://sfplanninggis.org/pim/"},
+     {q:"What suppression would SFFD require at that occupancy?", mode:"call", status:"open",
+      who:"fire", ask:"At this square footage and this use, what occupancy load and suppression would you require?"}
+   ]}
+]};
+
+
+/* ============ repo stats + contributors ============ */
+function repoStats(){
+  var open=0, closed=0, contrib={};
+  STATE.ideas.forEach(function(i){
+    (i.questions||[]).forEach(function(q){
+      if(q.status==='resolved'){ closed++; if(q.by) contrib[q.by]=(contrib[q.by]||0)+1; }
+      else open++;
+    });
+    (i.tenders||[]).forEach(function(t){ if(!(t in contrib)) contrib[t]=contrib[t]||0; });
+  });
+  return {open:open, closed:closed, contrib:contrib, repos:STATE.ideas.length};
+}
+
+function renderRepo(){
+  var r=repoStats();
+  var pct=(r.open+r.closed)?Math.round(r.closed/(r.open+r.closed)*100):0;
+  document.getElementById('repoStats').innerHTML=
+    '<div class="stats">'+
+    '<div><b>'+r.repos+'</b><span>idea repos</span></div>'+
+    '<div><b>'+r.open+'</b><span>open issues</span></div>'+
+    '<div><b>'+r.closed+'</b><span>commits</span></div>'+
+    '<div><b>'+Object.keys(r.contrib).length+'</b><span>contributors</span></div>'+
+    '</div><div class="bar" style="margin-top:.5rem"><i style="width:'+pct+'%"></i></div>'+
+    '<p class="pnote">'+pct+'% of everything asked about this parcel has been answered.</p>';
+
+  var ranked=Object.keys(r.contrib).map(function(k){return {n:k,c:r.contrib[k]}})
+    .sort(function(a,b){return b.c-a.c});
+  document.getElementById('board').innerHTML=
+    '<p class="lbl" style="color:var(--lit);font-family:Bricolage Grotesque,sans-serif;font-size:.66rem;font-weight:800;margin:0 0 .4rem">RANKED BY QUESTIONS ANSWERED</p>'+
+    (ranked.length?ranked.map(function(v,i){
+      return '<div class="lbrow"><span class="rk">'+(i+1)+'</span><span class="nm">'+esc(v.n)+'</span>'+
+        '<span class="ct">'+v.c+' commit'+(v.c===1?'':'s')+'</span></div>';
+    }).join(''):'<p class="pnote">Nobody has answered anything yet.</p>')+
+    '<p class="pnote">Answers carry across parcels. A zoning answer found here helps the next C-3 block too.</p>';
+}
+
+/* ============ chat with an idea — graph-grounded, works offline ============ */
+var CHAT_IDEA=null;
+
+function ideaFacts(i){
+  var r=retrieve(i.body);
+  return {idea:i, cons:(i.cons||[]).map(function(k){return Object.assign({key:k},GRAPH.constraints[k])}).filter(function(c){return c.label}),
+          orgs:r.orgs, progs:r.programs, qs:i.questions||[]};
+}
+
+function answerLocally(i, q){
+  var f=ideaFacts(i), t=q.toLowerCase(), out=[];
+  function has(){ for(var a=0;a<arguments.length;a++){ if(t.indexOf(arguments[a])>-1) return true } return false }
+
+  if(has('own','landlord','who owns','sign','lease','authority')){
+    var o=GRAPH.constraints.ownership;
+    out.push(o.detail);
+    out.push('Online first: '+o.online.what);
+    out.push('Then ask: '+o.call.ask);
+  }
+  if(has('historic','landmark','facade','preserv','1922','old')){
+    var hc=GRAPH.constraints.historic;
+    out.push(hc.detail);
+    out.push('Online first: '+hc.online.what);
+  }
+  if(has('block','stuck','barrier','stop','why not','hard','problem')){
+    out.push('Right now this has '+f.qs.filter(function(v){return v.status!=='resolved'}).length+
+      ' open questions. The ones I can name: '+f.cons.map(function(c){return c.label}).join(' · '));
+  }
+  if(has('money','cost','fund','grant','pay','how much','capital','$')){
+    out.push(f.progs.length
+      ? 'Programs that may apply: '+f.progs.map(function(p){return p.name+' ('+p.amount+') — '+p.what}).join(' | ')
+      : 'Nothing in this parcel\'s graph matches a funding program for this yet. That is a gap, not a no.');
+  }
+  if(has('who','call','contact','ask','agency','department')){
+    out.push(f.orgs.length
+      ? f.orgs.map(function(o){return o.name+' — ask: "'+o.ask+'"'}).join('\n')
+      : 'No agency matched yet. Say what actually happens in the room and I can route it.');
+  }
+  if(has('next','start','do','begin','how do i','step')){
+    var nx=f.qs.filter(function(v){return v.status!=='resolved'})[0];
+    out.push(nx ? (nx.mode==='online'
+      ? 'Smallest next step: '+nx.where+(nx.url?' → '+nx.url:'')
+      : 'Smallest next step: contact '+(nx.who?agencyName(nx.who):'the broker')+' and ask exactly: "'+nx.ask+'"')
+      : 'Every question on file is answered. This is ready to take to the owner.');
+  }
+  if(has('who is working','contribut','tending','anyone','team')){
+    out.push(i.tenders.length ? 'Tending it: '+i.tenders.join(', ') : 'Nobody is tending this. It stops here until someone takes a question.');
+  }
+  if(!out.length){
+    return {text:"I don't have that in this parcel's graph, so I'm not going to guess. What I do have on this idea: "+
+      f.cons.map(function(c){return c.label}).join(' · ')+". Try asking what's blocking it, who to call, or how much.", grounded:false};
+  }
+  return {text:out.join('\n\n'), grounded:true};
+}
+
+function pushMsg(who, text){
+  var log=document.getElementById('chatLog');
+  var d=document.createElement('div');
+  d.className='msg '+who;
+  d.innerHTML=String(text).split('\n').map(function(l){return esc(l)}).join('<br>');
+  log.appendChild(d); log.scrollTop=log.scrollHeight;
+}
+
+function openChat(id){
+  CHAT_IDEA=STATE.ideas.filter(function(i){return i.id===id})[0];
+  if(!CHAT_IDEA) return;
+  document.getElementById('chatTitle').textContent='repo #'+CHAT_IDEA.id+' · '+CHAT_IDEA.body.slice(0,46);
+  document.getElementById('chatLog').innerHTML='';
+  var pr=progress(CHAT_IDEA), cx=complexity(CHAT_IDEA.cons||[]);
+  pushMsg('bot','I am this idea at 225 Bush: "'+CHAT_IDEA.body+'"\n\n'+
+    STAGES[CHAT_IDEA.stage]+' · '+cx.band+' · '+pr.done+' of '+pr.total+' questions answered.\n\n'+
+    'Everything I say comes from this parcel\'s record. If it is not in there, I will tell you I do not know.');
+  document.getElementById('chatChips').innerHTML=
+    ['What is blocking you?','Who do I call first?','Is there money for this?','What is my smallest next step?']
+    .map(function(c){return '<button class="chip">'+c+'</button>'}).join('');
+  document.querySelectorAll('#chatChips .chip').forEach(function(b){
+    b.onclick=function(){ document.getElementById('chatIn').value=b.textContent; sendChat(); };
+  });
+  document.getElementById('chatWrap').style.display='flex';
+}
+
+function sendChat(){
+  var inp=document.getElementById('chatIn'), q=inp.value.trim();
+  if(!q||!CHAT_IDEA) return;
+  pushMsg('me', q); inp.value='';
+  var a=answerLocally(CHAT_IDEA, q);
+  setTimeout(function(){
+    pushMsg('bot', a.text);
+    if(!a.grounded){
+      var log=document.getElementById('chatLog');
+      var b=document.createElement('button'); b.className='btn sec tiny';
+      b.textContent='Copy a prompt for Claude';
+      b.onclick=function(){
+        var pr=buildPrompt(CHAT_IDEA.body, retrieve(CHAT_IDEA.body))+'\n\nTHEY ASKED: '+q;
+        if(navigator.clipboard) navigator.clipboard.writeText(pr);
+        b.textContent='Copied — paste it into Claude';
+      };
+      log.appendChild(b); log.scrollTop=log.scrollHeight;
+    }
+  }, 220);
+}
+
+
+/* ============ 3D spatial knowledge graph ============ */
+var THREE_READY=false, T={}, TOPO='centralized', TNODES=[];
+
+function loadThree(cb){
+  if(window.THREE){ cb(true); return; }
+  var s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+  s.onload=function(){ cb(!!window.THREE) };
+  s.onerror=function(){ cb(false) };
+  document.head.appendChild(s);
+}
+
+function graphNodes(){
+  var out=[], seen={};
+  STATE.ideas.forEach(function(i){
+    out.push({id:'idea:'+i.id, kind:'idea', label:i.body, ref:i,
+              weight:2.6+ (progress(i).pct/100)*1.4});
+  });
+  STATE.ideas.forEach(function(i){
+    (i.cons||[]).forEach(function(k){
+      if(seen['c'+k]) return; seen['c'+k]=1;
+      var c=GRAPH.constraints[k]; if(!c) return;
+      out.push({id:'con:'+k, kind:'con', label:c.label, ref:c, key:k, weight:2.1});
+    });
+    var r=retrieve(i.body);
+    r.orgs.forEach(function(o){ if(seen['o'+o.id])return; seen['o'+o.id]=1;
+      out.push({id:'org:'+o.id, kind:'org', label:o.name, ref:o, weight:1.7}) });
+    r.programs.forEach(function(pg){ if(seen['p'+pg.id])return; seen['p'+pg.id]=1;
+      out.push({id:'prog:'+pg.id, kind:'prog', label:pg.name+' ('+pg.amount+')', ref:pg, weight:1.7}) });
+  });
+  return out;
+}
+
+function graphEdges(nodes){
+  var byId={}; nodes.forEach(function(n){byId[n.id]=n});
+  var es=[];
+  STATE.ideas.forEach(function(i){
+    var a=byId['idea:'+i.id]; if(!a) return;
+    (i.cons||[]).forEach(function(k){ var b=byId['con:'+k]; if(b) es.push([a,b,'con']) });
+    var r=retrieve(i.body);
+    r.orgs.forEach(function(o){ var b=byId['org:'+o.id]; if(b) es.push([a,b,'org']) });
+    r.programs.forEach(function(pg){ var b=byId['prog:'+pg.id]; if(b) es.push([a,b,'prog']) });
+  });
+  /* constraint -> the agency that answers it */
+  Object.keys(GRAPH.constraints).forEach(function(k){
+    var c=GRAPH.constraints[k], a=byId['con:'+k];
+    if(a && c.call && c.call.agency && byId['org:'+c.call.agency]) es.push([a, byId['org:'+c.call.agency],'route']);
+  });
+  return es;
+}
+
+function layout(nodes, mode){
+  var golden=Math.PI*(3-Math.sqrt(5));
+  if(mode==='centralized'){
+    var ideas=nodes.filter(function(n){return n.kind==='idea'});
+    var others=nodes.filter(function(n){return n.kind!=='idea'});
+    ideas.forEach(function(n,i){
+      var a=(i/Math.max(1,ideas.length))*Math.PI*2;
+      n.pos=[Math.cos(a)*7, Math.sin(a)*3.2, Math.sin(a)*7];
+    });
+    others.forEach(function(n,i){
+      var y=1-(i/Math.max(1,others.length-1))*2, r=Math.sqrt(Math.max(0,1-y*y));
+      var th=golden*i;
+      n.pos=[Math.cos(th)*r*17, y*15, Math.sin(th)*r*17];
+    });
+  } else if(mode==='decentralized'){
+    var groups={idea:[],con:[],org:[],prog:[]};
+    nodes.forEach(function(n){groups[n.kind].push(n)});
+    var centers={idea:[0,0,0], con:[13,5,-4], org:[-13,-3,6], prog:[3,-12,-9]};
+    Object.keys(groups).forEach(function(g){
+      groups[g].forEach(function(n,i){
+        var y=1-(i/Math.max(1,groups[g].length-1))*2, r=Math.sqrt(Math.max(0,1-y*y)), th=golden*i;
+        n.pos=[centers[g][0]+Math.cos(th)*r*6, centers[g][1]+y*6, centers[g][2]+Math.sin(th)*r*6];
+      });
+    });
+  } else {
+    nodes.forEach(function(n,i){
+      var y=1-(i/Math.max(1,nodes.length-1))*2, r=Math.sqrt(Math.max(0,1-y*y)), th=golden*i;
+      n.pos=[Math.cos(th)*r*16, y*16, Math.sin(th)*r*16];
+    });
+  }
+}
+
+var COLOR={idea:0x84B096, con:0xE08A6B, org:0xC2D0E0, prog:0xF2C14E};
+
+function build3d(){
+  var host=document.getElementById('threeCanvas');
+  host.innerHTML='';
+  var W=host.clientWidth||window.innerWidth, H=host.clientHeight||window.innerHeight*0.7;
+  T.scene=new THREE.Scene();
+  T.camera=new THREE.PerspectiveCamera(55, W/H, 0.1, 500);
+  T.camera.position.set(0,6,44);
+  T.renderer=new THREE.WebGLRenderer({antialias:true, alpha:true});
+  T.renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+  T.renderer.setSize(W,H);
+  host.appendChild(T.renderer.domElement);
+  T.scene.add(new THREE.AmbientLight(0xffffff,0.85));
+  var dl=new THREE.DirectionalLight(0xffffff,0.55); dl.position.set(12,18,14); T.scene.add(dl);
+
+  T.group=new THREE.Group(); T.scene.add(T.group);
+  TNODES=graphNodes();
+  layout(TNODES, TOPO);
+  var edges=graphEdges(TNODES);
+
+  edges.forEach(function(e){
+    var g=new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(e[0].pos[0],e[0].pos[1],e[0].pos[2]),
+      new THREE.Vector3(e[1].pos[0],e[1].pos[1],e[1].pos[2])]);
+    var m=new THREE.LineBasicMaterial({color: e[2]==='route'?0x5B6B7C:COLOR[e[2]]||0x5B6B7C,
+      transparent:true, opacity: e[2]==='route'?0.28:0.42});
+    T.group.add(new THREE.Line(g,m));
+  });
+
+  T.meshes=[];
+  TNODES.forEach(function(n){
+    var geo=new THREE.SphereGeometry(n.weight*0.42, 20, 16);
+    var mat=new THREE.MeshStandardMaterial({color:COLOR[n.kind], roughness:0.45, metalness:0.1,
+      emissive:COLOR[n.kind], emissiveIntensity:0.18});
+    var me=new THREE.Mesh(geo,mat);
+    me.position.set(n.pos[0],n.pos[1],n.pos[2]);
+    me.userData=n; T.group.add(me); T.meshes.push(me);
+  });
+
+  /* interaction */
+  var down=false, lx=0, ly=0, ry=0, rx=0, moved=0;
+  function pd(e){ down=true; moved=0; var t=e.touches?e.touches[0]:e; lx=t.clientX; ly=t.clientY; }
+  function pm(e){ if(!down)return; var t=e.touches?e.touches[0]:e;
+    var dx=t.clientX-lx, dy=t.clientY-ly; moved+=Math.abs(dx)+Math.abs(dy);
+    ry+=dx*0.006; rx+=dy*0.004; rx=Math.max(-1.2,Math.min(1.2,rx));
+    lx=t.clientX; ly=t.clientY; e.preventDefault(); }
+  function pu(e){
+    if(down && moved<6){ pick(e); }
+    down=false;
+  }
+  var el=T.renderer.domElement;
+  el.addEventListener('mousedown',pd); el.addEventListener('touchstart',pd,{passive:true});
+  window.addEventListener('mousemove',pm); el.addEventListener('touchmove',pm,{passive:false});
+  window.addEventListener('mouseup',pu); el.addEventListener('touchend',pu);
+  el.addEventListener('wheel',function(e){
+    T.camera.position.z=Math.max(14,Math.min(90,T.camera.position.z+e.deltaY*0.05)); e.preventDefault(); },{passive:false});
+
+  var ray=new THREE.Raycaster(), v2=new THREE.Vector2();
+  function pick(e){
+    var t=e.changedTouches?e.changedTouches[0]:e;
+    var r=el.getBoundingClientRect();
+    v2.x=((t.clientX-r.left)/r.width)*2-1; v2.y=-((t.clientY-r.top)/r.height)*2+1;
+    ray.setFromCamera(v2,T.camera);
+    var hits=ray.intersectObjects(T.meshes);
+    var box=document.getElementById('threeInspect');
+    if(!hits.length){ box.style.display='none'; return; }
+    var n=hits[0].object.userData;
+    var h='<p class="lbl">'+n.kind.toUpperCase()+'</p><h3>'+esc(n.label)+'</h3>';
+    if(n.kind==='idea'){
+      var pr=progress(n.ref);
+      h+='<p>'+STAGES[n.ref.stage]+' · '+pr.done+'/'+pr.total+' answered · '+
+         (n.ref.tenders.length?esc(n.ref.tenders.join(', ')):'nobody tending')+'</p>';
+      h+='<button class="btn tiny" id="i3chat">Chat with this idea</button>';
+    }
+    if(n.kind==='con'){
+      var sh=sharedBy(n.key);
+      h+='<p>'+esc(n.ref.detail)+'</p><p><b>'+sh.length+' idea'+(sh.length===1?'':'s')+' hit this same wall.</b></p>';
+    }
+    if(n.kind==='org') h+='<p>'+esc(n.ref.handles)+'</p><p><b>Ask:</b> '+esc(n.ref.ask)+'</p>';
+    if(n.kind==='prog') h+='<p>'+esc(n.ref.what)+'</p>';
+    box.innerHTML=h; box.style.display='block';
+    var cb=document.getElementById('i3chat');
+    if(cb) cb.onclick=function(){ document.getElementById('threeWrap').style.display='none'; openChat(n.ref.id); };
+  }
+
+  (function animate(){
+    if(!T.renderer) return;
+    T.req=requestAnimationFrame(animate);
+    T.group.rotation.y += (ry - T.group.rotation.y)*0.08 + 0.0012;
+    T.group.rotation.x += (rx - T.group.rotation.x)*0.08;
+    T.renderer.render(T.scene,T.camera);
+  })();
+}
+
+function open3d(){
+  var wrap=document.getElementById('threeWrap');
+  wrap.style.display='flex';
+  document.getElementById('threeHint').textContent='Loading the graph…';
+  loadThree(function(ok){
+    if(!ok){
+      document.getElementById('threeCanvas').innerHTML=
+        '<div class="nofall"><p><b>The 3D view needs to load a library from the network, and it did not load.</b></p>'+
+        '<p>The plan view in section 06 has the same graph and works offline. Nothing is lost.</p></div>';
+      document.getElementById('threeHint').textContent='';
+      return;
+    }
+    THREE_READY=true;
+    document.getElementById('threeHint').textContent='Drag to rotate · scroll to zoom · tap a node';
+    build3d();
+  });
+}
+
+function close3d(){
+  if(T.req) cancelAnimationFrame(T.req);
+  if(T.renderer){ T.renderer.dispose&&T.renderer.dispose(); T.renderer=null; }
+  document.getElementById('threeCanvas').innerHTML='';
+  document.getElementById('threeInspect').style.display='none';
+  document.getElementById('threeWrap').style.display='none';
+}
+
+
+/* ============ contact card + draft email ============ */
+function draftEmail(agency, idea, q){
+  var subj='225 Bush Street ground-floor retail — '+(q? q.q : 'question about a proposed use');
+  var body=[
+"Hello,",
+"",
+"I'm asking about the vacant ground-floor retail at 225 Bush Street in San Francisco.",
+"",
+"Proposed use: "+(idea?idea.body:"(describe the use)"),
+"",
+"My question: "+(q&&q.ask ? q.ask : (q?q.q:"(your question)")),
+"",
+"What I already checked before writing:",
+(idea? (idea.questions||[]).filter(function(v){return v.status==='resolved'})
+   .map(function(v){return "- "+v.q+" → "+v.answer}).join("\n") : ""),
+"",
+"Parcel details I have:",
+"- Address: "+PARCEL.address,
+"- Block/Lot: "+PARCEL.block_lot,
+"- Zoning: "+PARCEL.zoning_district,
+"",
+"If this isn't the right desk, I'd be grateful if you could point me to who handles it.",
+"",
+"Thank you,",
+"(your name · your phone)"
+].filter(function(l,i,a){ return !(l==='' && a[i-1]===''); }).join("\n");
+  return {subject:subj, body:body};
+}
+
+function contactBlock(agency, ideaId, qi){
+  if(!agency) return '<p class="qw">This one is for the owner or broker, not the city. '+
+    esc(PARCEL.retail_broker||'Check the listing sign')+'.</p>';
+  var h='<div class="contact">';
+  if(agency.verified){
+    h+='<p class="cline"><b>'+esc(agency.name)+'</b></p>';
+    if(agency.phone) h+='<p class="cline"><a href="tel:'+agency.phone.replace(/[^0-9]/g,'')+'">'+esc(agency.phone)+'</a>'+
+      (agency.email?' · <a href="mailto:'+agency.email+'">'+esc(agency.email)+'</a>':'')+'</p>';
+    if(agency.addr) h+='<p class="cline dim">'+esc(agency.addr)+'</p>';
+    if(agency.note) h+='<p class="cline dim">'+esc(agency.note)+'</p>';
+    h+='<button class="btn sec tiny" data-mail="'+ideaId+':'+qi+'">Draft an email</button>';
+  } else {
+    h+='<p class="cline"><b>'+esc(agency.name)+'</b></p>';
+    h+='<p class="cline unver">No verified number on file yet. '+
+       '<a href="'+(agency.lookup||'https://www.sf.gov/')+'" target="_blank" rel="noopener">Look it up</a> '+
+       'and add it — this tool does not guess phone numbers.</p>';
+  }
+  h+='</div>';
+  return h;
+}
+
+function showDraft(ideaId, qi){
+  var idea=STATE.ideas.filter(function(i){return i.id===ideaId})[0];
+  var q=idea?idea.questions[qi]:null;
+  var ag=(q&&q.who)?GRAPH.agencies.filter(function(a){return a.id===q.who})[0]:null;
+  var d=draftEmail(ag, idea, q);
+  var to=(ag&&ag.email)?ag.email:'';
+  var wrap=document.getElementById('mailWrap');
+  document.getElementById('mailTitle').textContent='Draft to '+(ag?ag.name:'the broker');
+  document.getElementById('mailBody').innerHTML=
+    '<p class="lbl">SUBJECT</p><p class="mline">'+esc(d.subject)+'</p>'+
+    '<p class="lbl">BODY</p><pre id="mailText">'+esc(d.body)+'</pre>'+
+    '<div class="row">'+
+    '<button class="btn" id="copyMail">Copy the email</button>'+
+    (to?'<a class="btn sec" href="mailto:'+to+'?subject='+encodeURIComponent(d.subject)+
+        '&body='+encodeURIComponent(d.body)+'">Open in mail</a>':'')+
+    '<button class="btn sec" id="copyAgent">Copy a brief for your agent</button>'+
+    '</div>'+
+    '<p class="pnote">San Francisco Planning has an active warning about phishing emails requesting permit payments. No city office will ask you to pay by email. Verify before sending money.</p>';
+  wrap.style.display='flex';
+  document.getElementById('copyMail').onclick=function(){
+    if(navigator.clipboard) navigator.clipboard.writeText(d.subject+"\n\n"+d.body);
+    this.textContent='Copied';
+  };
+  document.getElementById('copyAgent').onclick=function(){
+    var brief=[
+"TASK: find the answer to one question about a vacant storefront, then report back.",
+"",
+"PARCEL: "+PARCEL.address+" · block/lot "+PARCEL.block_lot+" · zoning "+PARCEL.zoning_district,
+"PROPOSED USE: "+(idea?idea.body:''),
+"QUESTION: "+(q?q.q:''),
+"WHO ANSWERS IT: "+(ag?ag.name+(ag.phone?' · '+ag.phone:'')+(ag.email?' · '+ag.email:''):'the property broker'),
+"EXACT ASK: "+(q&&q.ask?q.ask:''),
+"",
+"RULES:",
+"- Check public sources first: "+PARCEL.sources.map(function(s){return s.name+' ('+s.url+')'}).join('; '),
+"- Do not state a rule, code section, fee or deadline you cannot cite to a source.",
+"- If the public record cannot answer it, say so and draft the email instead of guessing.",
+"- Report back as: ANSWER, SOURCE, CONFIDENCE, WHAT STILL NEEDS A HUMAN."
+].join("\n");
+    if(navigator.clipboard) navigator.clipboard.writeText(brief);
+    this.textContent='Copied the agent brief';
+  };
+}
+
+
+/* ============ agent-ready surface ============ */
+function agentState(){
+  return {
+    parcel: PARCEL,
+    updated: new Date().toISOString(),
+    repos: STATE.ideas.map(function(i){
+      var pr=progress(i), cx=complexity(i.cons||[]);
+      return {
+        repo_id: 'parcel/225-bush/idea/'+i.id,
+        idea: i.body,
+        stage: STAGES[i.stage],
+        complexity: cx.band,
+        tags: retrieve(i.body).tags,
+        agreement: {agree:i.agree, groups:i.groups, bridging:i.groups>=2},
+        tending: i.tenders,
+        answered: pr.done, open: pr.total-pr.done,
+        needs_next: pr.next ? {question:pr.next.q, mode:pr.next.mode,
+          where: pr.next.where||null, ask: pr.next.ask||null} : null,
+        can_help_now: (i.questions||[]).filter(function(q){return q.status==='open'})
+          .map(function(q){return {question:q.q, mode:q.mode, where:q.where||null, ask:q.ask||null}}),
+        resolved: (i.questions||[]).filter(function(q){return q.status==='resolved'})
+          .map(function(q){return {question:q.q, answer:q.answer, by:q.by}})
+      };
+    }),
+    constraints: Object.keys(GRAPH.constraints).map(function(k){
+      var c=GRAPH.constraints[k];
+      return {key:k, label:c.label, detail:c.detail,
+              online:c.online||null, call:c.call||null,
+              shared_by: sharedBy(k).map(function(i){return i.id})};
+    }),
+    agencies: GRAPH.agencies,
+    programs: GRAPH.programs,
+    sources: PARCEL.sources
+  };
+}
+
+/* "which ideas here align with my interests?" */
+function matchInterests(text){
+  var t=String(text||'').toLowerCase();
+  var wanted={};
+  GRAPH.tags.forEach(function(g){
+    for(var i=0;i<g.match.length;i++){ if(t.indexOf(g.match[i])>-1){ wanted[g.tag]=1; break } }
+  });
+  var words=t.split(/[^a-z]+/).filter(function(w){return w.length>3});
+  return STATE.ideas.map(function(i){
+    var tags=retrieve(i.body).tags, score=0, why=[];
+    tags.forEach(function(tg){ if(wanted[tg]){ score+=3; why.push('same category: '+tg) } });
+    var body=i.body.toLowerCase();
+    words.forEach(function(w){ if(body.indexOf(w)>-1){ score+=1; why.push('mentions "'+w+'"') } });
+    var pr=progress(i);
+    if(score>0 && !i.tenders.length){ score+=1; why.push('nobody tending it — open to take') }
+    if(score>0 && pr.next && pr.next.mode==='online'){ score+=1; why.push('its next step is answerable online') }
+    return {repo_id:'parcel/225-bush/idea/'+i.id, id:i.id, idea:i.body, score:score,
+            why:why, needs_next: pr.next?pr.next.q:null,
+            mode: pr.next?pr.next.mode:null};
+  }).filter(function(r){return r.score>0}).sort(function(a,b){return b.score-a.score});
+}
+
+window.PlantAnIdea = {
+  version: '0.1',
+  parcel: function(){ return PARCEL },
+  state: agentState,
+  match: matchInterests,
+  graph: function(){ return GRAPH },
+  schema: function(){ return SB_SCHEMA },
+  plant: function(body, opts){
+    var r=retrieve(body), qs=[];
+    r.constraints.forEach(function(c){
+      if(c.online) qs.push({q:c.label, mode:"online", status:"open", where:c.online.what, url:c.online.url});
+      if(c.call) qs.push({q:c.label, mode:"call", status:"open", who:c.call.agency, ask:c.call.ask});
+    });
+    var id=STATE.nextId++;
+    STATE.ideas.push({id:id, body:body, stage:0, cons:r.constraints.map(function(c){return c.key}),
+      anchor:{x:30+((id*17)%50), z:25+((id*29)%50), surface:'placed by agent'},
+      relayed:!!(opts&&opts.relayed), tenders:(opts&&opts.by)?[opts.by]:[],
+      agree:0,no:0,groups:0, questions:qs});
+    sbInsert('ideas',{parcel_id:'225-bush', body:body, stage:0});
+    renderIdeas();
+    return 'parcel/225-bush/idea/'+id;
+  }
+};
+
+
+/* ============ deck mode ============ */
+function deckSlides(){
+  var r=repoStats();
+  var ranked=STATE.ideas.slice().sort(function(a,b){return (b.groups-a.groups)||(b.agree-a.agree)});
+  var top=ranked[0]||{body:'—',agree:0,groups:0};
+  return [
+  {k:'title', h:'Plant an idea where the lights are off',
+   s:'225 Bush Street · the old Standard Oil Building · Building for SF',
+   b:['A way to stand in front of a vacant storefront, say what it should become, and find out which ideas other people actually agree with.'],
+   foot:'Michael Lopez · innercartography.one'},
+
+  {k:'p', h:'Ideas are not the bottleneck', s:'OEWD said so last night',
+   b:['Vacancy tax: no change. Incentives: no change. Public acquisition: no change.',
+      'What actually stops it: lease execution, insurance, permitting, code upgrades, and owners who are cautious about the time and effort of an unfamiliar tenant.',
+      'So we did not build another idea box.']},
+
+  {k:'p', h:'Nobody in this is being unreasonable',
+   b:['The owner does not know whether an unusual use would be welcomed.',
+      'The resident does not know the owner would consider it.',
+      'The operator does not know whether the permit works.',
+      'The city does not know whether an operator exists.',
+      'Everyone waits. The space stays dark.'],
+   foot:'Coordination under uncertainty'},
+
+  {k:'list', h:'Eight parties. One room.', s:'None of them can move alone',
+   items:['Property owner','Listing broker','Prospective operator','Residents on the block',
+          'Neighboring businesses','OEWD program staff','Planning and permitting','District supervisor']},
+
+  {k:'flag', h:'225 Bush, right now', s:'From the public record',
+   b:['A $350M first mortgage went into maturity default in November 2024. A CMBS trust has been selling the note through JLL, and the listing showed Under Contract in August 2026.',
+      'JLL\u2019s own investment highlights list activation of the ground floor as a repositioning opportunity.',
+      'A new owner is arriving with that mandate — and no record of what this block wants there.'],
+   foot:'That record is the thing we made.'},
+
+  {k:'live', h:'What the block wants', s:'live from the app',
+   render:function(){
+     return ranked.slice(0,4).map(function(i){
+       var pr=progress(i), cx=complexity(i.cons||[]);
+       return '<div class="dcard"><p class="dbody">'+esc(i.body)+'</p>'+
+         '<p class="dmeta"><span class="cx '+cx.cls+'">'+esc(cx.band)+'</span> '+
+         i.agree+' agree'+(i.groups>=2?' across '+i.groups+' groups':'')+
+         ' · '+pr.done+'/'+pr.total+' answered · '+
+         (i.tenders.length?esc(i.tenders.length+' tending'):'nobody tending')+'</p></div>';
+     }).join('');
+   }},
+
+  {k:'p', h:'Agree, disagree, or plant your own', s:'No replies',
+   b:['Taken from Polis, the tool behind Taiwan\u2019s vTaiwan process. Removing replies removes most of the surface for pile-ons.',
+      'What rises is what several people wanted, across different groups — not what one person argued hardest for.',
+      'Nobody has to sort out who was really upset about what.']},
+
+  {k:'p', h:'Online before you call', s:'the part most civic tools get backwards',
+   b:['Every constraint carries two steps. What you can look up yourself, and who to ring once the record runs out.',
+      'The call only unlocks when the online questions are done.',
+      'Real numbers where we verified them. Where we did not, it says so — this tool does not guess phone numbers.']},
+
+  {k:'p', h:'One wall, four ideas', s:'the coordination payoff',
+   b:['Every idea at 225 Bush hits the same two parcel-level constraints: nobody can sign while the note is in transition, and it is a 1922 landmark.',
+      'Answer either one and all four move at once.',
+      'That is what the graph is for.']},
+
+  {k:'live', h:'225 Bush · master repo', s:'every idea is its own repo',
+   render:function(){
+     var pct=(r.open+r.closed)?Math.round(r.closed/(r.open+r.closed)*100):0;
+     return '<div class="stats"><div><b>'+r.repos+'</b><span>idea repos</span></div>'+
+       '<div><b>'+r.open+'</b><span>open issues</span></div>'+
+       '<div><b>'+r.closed+'</b><span>commits</span></div>'+
+       '<div><b>'+Object.keys(r.contrib).length+'</b><span>contributors</span></div></div>'+
+       '<p class="dmeta" style="margin-top:.8rem">'+pct+'% of everything asked about this parcel has been answered. '+
+       'An answer found here helps the next C-3 block too.</p>';
+   }},
+
+  {k:'p', h:'How it stays true',
+   b:['Public records get pulled and re-checked automatically.',
+      'The city can correct anything through a link.',
+      'The rest comes from people who made the call and wrote down what they heard.'],
+   foot:'Every fact carries where it came from and when.'},
+
+  {k:'p', h:'Next 90 days', s:'and the part we committed to',
+   b:['One district. Ten parcels wired to zoning and permit data, with a named human for each blocker type.',
+      'Each stakeholder role becomes its own doorway into the same graph.',
+      'In two weeks: scan 225 Bush with the PortalCam, hand-wire its permit history, and walk it back to the people we met this weekend.'],
+   foot:'Michael Lopez · innercartography.one · linkedin.com/in/miiike415'}
+  ];
+}
+
+var DECK=[], DI=0;
+function renderDeck(){
+  var s=DECK[DI]; if(!s) return;
+  var h='<div class="slide '+(s.k==='flag'?'flag':'')+'">';
+  h+='<h2 class="dh">'+esc(s.h)+'</h2>';
+  if(s.s) h+='<p class="ds">'+esc(s.s)+'</p>';
+  if(s.b) h+=s.b.map(function(l){return '<p class="db">'+esc(l)+'</p>'}).join('');
+  if(s.items) h+='<div class="dlist">'+s.items.map(function(i){return '<span>'+esc(i)+'</span>'}).join('')+'</div>';
+  if(s.render) h+='<div class="dlive">'+s.render()+'</div>';
+  if(s.foot) h+='<p class="df">'+esc(s.foot)+'</p>';
+  h+='</div>';
+  document.getElementById('deckStage').innerHTML=h;
+  document.getElementById('deckNum').textContent=(DI+1)+' / '+DECK.length;
+}
+function openDeck(){
+  DECK=deckSlides(); DI=0;
+  document.getElementById('deckWrap').style.display='flex';
+  renderDeck();
+}
+function deckStep(n){ DI=Math.max(0,Math.min(DECK.length-1, DI+n)); renderDeck(); }
+
+
+/* ============ step mode: one section at a time ============ */
+var STEP=0, STEPS=[], STEP_MODE=true;
+
+function initSteps(){
+  STEPS=[].slice.call(document.querySelectorAll('#afterScan > .card'));
+  var rail=document.getElementById('stepRail');
+  rail.innerHTML=STEPS.map(function(c,i){
+    var h2=c.querySelector('h2');
+    var label=h2?h2.textContent.replace(/^\d+\s*/,'').trim():('Step '+(i+1));
+    return '<button class="sr" data-s="'+i+'" title="'+label.replace(/"/g,'')+'"><span></span></button>';
+  }).join('');
+  rail.querySelectorAll('.sr').forEach(function(b){
+    b.onclick=function(){ goStep(+b.dataset.s) };
+  });
+  goStep(0);
+}
+
+function goStep(n){
+  if(!STEP_MODE){ return }
+  STEP=Math.max(0,Math.min(STEPS.length-1,n));
+  STEPS.forEach(function(c,i){ c.style.display = (i===STEP)?'block':'none' });
+  var rail=document.getElementById('stepRail');
+  rail.querySelectorAll('.sr').forEach(function(b,i){
+    b.className='sr'+(i<STEP?' done':'')+(i===STEP?' on':'');
+  });
+  var h2=STEPS[STEP].querySelector('h2');
+  document.getElementById('stepLabel').textContent=
+    (STEP+1)+' / '+STEPS.length+(h2?' · '+h2.textContent.replace(/^\d+\s*/,'').trim():'');
+  document.getElementById('stepPrev').disabled = STEP===0;
+  document.getElementById('stepNext').textContent = (STEP===STEPS.length-1)?'Done':'Next →';
+  window.scrollTo({top:0,behavior:'instant'});
+}
+
+function setStepMode(on){
+  STEP_MODE=on;
+  document.getElementById('stepBar').style.display = on?'flex':'none';
+  document.body.classList.toggle('stepping', on);
+  if(on){ goStep(STEP); }
+  else { STEPS.forEach(function(c){ c.style.display='block' }); }
+  var t=document.getElementById('toggleStep');
+  if(t) t.textContent = on?'Scroll view':'Step view';
+}
+
+/* ---------- render ---------- */
+function esc(s){return String(s).replace(/[&<>]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;'})[c]})}
+
+function renderParcel(){
+  var p=PARCEL, keys=[["Address","address"],["District","district"],["Block/Lot","block_lot"],
+    ["Zoning","zoning_district"],["Vacant since","vacant_since"],["Broker","retail_broker"]];
+  var h='<div class="parcel">'+keys.filter(function(k){return p[k[1]]}).map(function(k){
+    return '<div><b>'+k[0]+'</b> '+esc(p[k[1]])+'</div>'}).join('')+'</div>';
+  if(p.common_name) h+='<p class="pnote">'+esc(p.common_name)+'</p>';
+  if(p.building) h+='<p class="pnote">'+esc(p.building)+'</p>';
+  if(p.owner_entity) h+='<div class="flagbox"><p class="lbl">OWNERSHIP</p><p>'+esc(p.owner_entity)+'</p></div>';
+  if(p.known_constraints && p.known_constraints.length) h+='<p class="pnote"><b>On file:</b> '+
+    p.known_constraints.map(esc).join(' · ')+'</p>';
+  document.getElementById('parcelBox').innerHTML=h;
+  document.getElementById('nDist').textContent=p.district;
+  document.getElementById('nBlock').textContent=p.block_lot;
+  document.getElementById('parcelJson').value=JSON.stringify(PARCEL,null,2);
+}
+
+function renderRoles(){
+  document.getElementById('roles').innerHTML=ROLES.map(function(r){
+    return '<button data-r="'+esc(r)+'"'+(STATE.role===r?' class="on"':'')+'>'+esc(r)+'</button>'}).join('');
+  document.querySelectorAll('#roles button').forEach(function(b){
+    b.onclick=function(){STATE.role=b.dataset.r; renderRoles(); renderIdeas();};
+  });
+}
+
+function progress(idea){
+  var qs=idea.questions||[];
+  var done=qs.filter(function(q){return q.status==='resolved'}).length;
+  var online=qs.filter(function(q){return q.mode==='online'&&q.status!=='resolved'});
+  var calls=qs.filter(function(q){return q.mode==='call'&&q.status!=='resolved'});
+  return {done:done, total:qs.length, pct:qs.length?Math.round(done/qs.length*100):0,
+          online:online, calls:calls,
+          next: online[0] || calls[0] || null,
+          callReady: online.length===0 && calls.length>0};
+}
+
+function stageBar(idx){
+  return '<div class="ladder">'+STAGES.map(function(s,i){
+    return '<span class="'+(i<=idx?'on':'')+'">'+esc(s)+'</span>'}).join('')+'</div>';
+}
+
+function qLine(q,ideaId,qi){
+  var h='<div class="q '+q.status+'">';
+  h+='<div class="qhead"><span class="mode '+q.mode+'">'+(q.mode==='online'?'online':'needs a call')+'</span>';
+  h+='<span class="st">'+(q.status==='resolved'?'resolved':q.status==='working'?'someone is on it':'open')+'</span></div>';
+  h+='<p class="qt">'+esc(q.q)+'</p>';
+  if(q.status==='resolved'){
+    h+='<p class="qa">'+esc(q.answer)+(q.by?' <small>— found by '+esc(q.by)+'</small>':'')+'</p>';
+  } else if(q.mode==='online'){
+    h+='<p class="qw">'+esc(q.where)+'</p>';
+    h+='<div class="qrow"><a class="btn sec tiny" href="'+(q.url||'#')+'" target="_blank" rel="noopener">Go look it up</a>';
+    h+='<button class="btn sec tiny" data-claim="'+ideaId+':'+qi+'">'+(q.status==='working'?'Mark resolved':"I'll take this")+'</button></div>';
+  } else {
+    var ag=q.who?GRAPH.agencies.filter(function(a){return a.id===q.who})[0]:null;
+    h+='<p class="qw"><b>Ask exactly this:</b> '+esc(q.ask)+'</p>';
+    h+=contactBlock(ag, ideaId, qi);
+    h+='<div class="qrow"><button class="btn sec tiny" data-claim="'+ideaId+':'+qi+'">'+(q.status==='working'?'Mark resolved':"I'll make this call")+'</button></div>';
+  }
+  h+='</div>';
+  return h;
+}
+
+function renderIdeas(){
+  var sorted=STATE.ideas.slice().sort(function(a,b){
+    var pa=progress(a),pb=progress(b);
+    return (b.stage-a.stage)||(pb.pct-pa.pct);
+  });
+  document.getElementById('ideas').innerHTML=sorted.map(function(i){
+    var p=progress(i);
+    var h='<div class="idea"><p class="body">'+esc(i.body)+'</p>';
+    h+=stageBar(i.stage);
+    var cx=complexity(i.cons||[]);
+    h+='<div class="meta"><span class="cx '+cx.cls+'">'+esc(cx.band)+'</span>';
+    if(LENS==='owner') h+='<span class="cxn">'+esc(cx.note)+'</span>';
+    h+='<div class="bar"><i style="width:'+p.pct+'%"></i></div>';
+    h+='<span>'+p.done+' of '+p.total+' questions answered</span>';
+    if(i.groups>=2) h+='<span class="badge">'+i.agree+' agree across '+i.groups+' groups</span>';
+    else h+='<span class="badge relay">'+i.agree+' agree</span>';
+    if(i.relayed) h+='<span class="badge relay">relayed</span>';
+    h+='</div>';
+
+    if(LENS==='owner'){
+      var oq=i.questions.filter(function(q){return q.mode==='call'&&q.status!=='resolved'});
+      h+='<div class="needs"><p class="lbl">WHAT WOULD LAND ON YOU</p><p>'+
+         (oq.length?esc(oq.map(function(q){return q.q}).join(' · ')):'Nothing outstanding on the property side.')+'</p></div>';
+    }
+    if(LENS==='policy'){
+      var pr=progress(i);
+      h+='<div class="needs"><p class="lbl">SIGNAL</p><p>'+i.agree+' agree across '+i.groups+
+         ' groups · '+pr.done+'/'+pr.total+' questions closed · '+i.tenders.length+' people tending'+
+         (pr.callReady?' · waiting on a city answer':'')+'</p></div>';
+    }
+    h+='<p class="tend">'+(i.tenders.length
+        ? '<b>Tending it:</b> '+i.tenders.map(esc).join(', ')
+        : '<b>Nobody is tending this yet.</b> It stops here unless someone picks up a question below.')+'</p>';
+
+    if(p.next){
+      h+='<div class="needs"><p class="lbl">WHAT IT NEEDS NEXT</p><p>'+esc(p.next.q)+
+         (p.callReady?' <span class="mode call">time to call</span>':' <span class="mode online">answerable online</span>')+'</p></div>';
+    } else {
+      h+='<div class="needs done"><p class="lbl">EVERY QUESTION ON FILE IS ANSWERED</p><p>This is ready to go to the owner.</p></div>';
+    }
+
+    h+='<div class="row"><button class="btn sec tiny toggle" data-open="'+i.id+'">'+p.total+' issues</button>'+
+       '<button class="btn sec tiny" data-chat="'+i.id+'">Chat with this idea</button></div>';
+    var focus=ROLE_FOCUS[STATE.role]||ROLE_FOCUS["Skip"];
+    var shown=i.questions.map(function(q,qi){return {q:q,qi:qi}}).filter(function(o){
+      return o.q.status==='resolved' || focus.modes.indexOf(o.q.mode)>-1; });
+    var hidden=i.questions.length-shown.length;
+    h+='<div class="qs" id="qs-'+i.id+'" style="display:none">'+
+        (STATE.role&&STATE.role!=='Skip'?'<p class="focusnote">Showing '+esc(focus.wants)+'.'+
+          (hidden?' '+hidden+' other question'+(hidden>1?'s':'')+' hidden for your role.':'')+'</p>':'')+
+        shown.map(function(o){return qLine(o.q,i.id,o.qi)}).join('')+'</div>';
+    h+='</div>';
+    return h;
+  }).join('');
+
+  renderSpatial(); renderRepo();
+  document.querySelectorAll('[data-chat]').forEach(function(b){
+    b.onclick=function(){ openChat(+b.dataset.chat) };
+  });
+  document.querySelectorAll('[data-open]').forEach(function(b){
+    b.onclick=function(){
+      var d=document.getElementById('qs-'+b.dataset.open);
+      var open=d.style.display!=='none';
+      d.style.display=open?'none':'block';
+      b.textContent=open?('Open the '+d.children.length+' questions'):'Hide questions';
+    };
+  });
+  document.querySelectorAll('[data-mail]').forEach(function(b){
+    b.onclick=function(){ var pp=b.dataset.mail.split(':'); showDraft(+pp[0], +pp[1]); };
+  });
+  document.querySelectorAll('[data-claim]').forEach(function(b){
+    b.onclick=function(){
+      var parts=b.dataset.claim.split(':'), id=+parts[0], qi=+parts[1];
+      var idea=STATE.ideas.filter(function(x){return x.id===id})[0];
+      var q=idea.questions[qi];
+      if(q.status==='open'){
+        q.status='working';
+        var who=(STATE.role&&STATE.role!=='Skip')?STATE.role:'someone here';
+        sbInsert('questions',{idea_id:id, q:q.q, mode:q.mode, status:'working'});
+        if(idea.tenders.indexOf(who)===-1) idea.tenders.push(who);
+      } else if(q.status==='working'){
+        var a=prompt('What did you find out? This becomes the answer on record.');
+        if(a){ q.status='resolved'; q.answer=a; q.by=(STATE.role&&STATE.role!=='Skip')?STATE.role:'anon';
+               sbInsert('questions',{idea_id:id, q:q.q, mode:q.mode, status:'resolved', answer:a,
+                 answered_by:q.by, tier:'community', asserted_at:new Date().toISOString()});
+               if(progress(idea).done>=2 && idea.stage<2) idea.stage=2; }
+      }
+      renderIdeas();
+      var d=document.getElementById('qs-'+id); if(d){d.style.display='block'}
+    };
+  });
+}
+
+var FOCUS=null, FOCUS_KIND=null;
+
+function conLabel(k){ var c=GRAPH.constraints[k]; return c?c.label:k; }
+
+/* Which ideas share a given constraint — the coordination payoff. */
+function sharedBy(conKey){
+  return STATE.ideas.filter(function(i){return (i.cons||[]).indexOf(conKey)>-1});
+}
+
+function renderSpatial(){
+  var svg=document.getElementById('graphSvg');
+  if(!svg) return;
+  var s='';
+  /* the room: street frontage at the bottom */
+  s+='<rect x="8" y="8" width="84" height="80" fill="rgba(255,255,255,.03)" stroke="rgba(194,208,224,.28)" stroke-width="0.5"/>';
+  s+='<line x1="8" y1="88" x2="92" y2="88" stroke="#F2C14E" stroke-width="1.4" opacity=".8"/>';
+  s+='<text x="50" y="95" fill="rgba(242,193,78,.85)" font-size="3.2" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif">STREET FRONTAGE</text>';
+  s+='<text x="50" y="5.5" fill="rgba(194,208,224,.5)" font-size="2.8" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif">BACK WALL</text>';
+
+  var focusIdea = (FOCUS_KIND==='idea') ? STATE.ideas.filter(function(i){return i.id===FOCUS})[0] : null;
+
+  /* satellites around the focused idea */
+  if(focusIdea && focusIdea.anchor){
+    var a=focusIdea.anchor;
+    var cons=(focusIdea.cons||[]);
+    var r=retrieve(focusIdea.body);
+    var sats=[];
+    cons.forEach(function(k){ sats.push({t:'con', k:k, label:conLabel(k)}) });
+    r.orgs.slice(0,3).forEach(function(o){ sats.push({t:'org', k:o.id, label:o.name}) });
+    r.programs.slice(0,2).forEach(function(pr){ sats.push({t:'prog', k:pr.id, label:pr.name}) });
+    var n=sats.length||1;
+    sats.forEach(function(sat,i){
+      var ang=(-90 + (i*(300/n)) - 150) * Math.PI/180;
+      var rad = sat.t==='con' ? 20 : 30;
+      var sx=Math.max(11,Math.min(89, a.x + Math.cos(ang)*rad));
+      var sy=Math.max(11,Math.min(85, a.z + Math.sin(ang)*rad));
+      sat.sx=sx; sat.sy=sy;
+      s+='<line x1="'+a.x+'" y1="'+a.z+'" x2="'+sx+'" y2="'+sy+'" stroke="'+
+         (sat.t==='con'?'rgba(224,138,107,.6)':sat.t==='org'?'rgba(194,208,224,.45)':'rgba(242,193,78,.5)')+
+         '" stroke-width="0.4"/>';
+    });
+    sats.forEach(function(sat){
+      var fill = sat.t==='con'?'#E08A6B': sat.t==='org'?'#C2D0E0':'#F2C14E';
+      s+='<g class="node" data-kind="'+sat.t+'" data-k="'+sat.k+'" style="cursor:pointer">';
+      s+='<circle cx="'+sat.sx+'" cy="'+sat.sy+'" r="2.4" fill="'+fill+'" opacity=".9"/>';
+      s+='<title>'+sat.label.replace(/[<>&]/g,'')+'</title></g>';
+    });
+  }
+
+  /* idea nodes, always drawn */
+  STATE.ideas.forEach(function(i){
+    if(!i.anchor) return;
+    var pr=progress(i), cx=complexity(i.cons||[]);
+    var lit=(FOCUS_KIND==='idea'&&FOCUS===i.id);
+    var dim=(FOCUS_KIND==='con'&&sharedBy(FOCUS).indexOf(i)===-1);
+    var ring = cx.cls==='c1'?'#84B096': cx.cls==='c2'?'#F2C14E':'#E08A6B';
+    s+='<g class="node" data-kind="idea" data-k="'+i.id+'" style="cursor:pointer" opacity="'+(dim?.28:1)+'">';
+    s+='<circle cx="'+i.anchor.x+'" cy="'+i.anchor.z+'" r="'+(lit?5.4:4.4)+'" fill="none" stroke="'+ring+'" stroke-width="'+(lit?1.1:0.7)+'"/>';
+    s+='<circle cx="'+i.anchor.x+'" cy="'+i.anchor.z+'" r="3" fill="#84B096" opacity="'+(0.25+0.6*(pr.pct/100))+'"/>';
+    s+='<text x="'+i.anchor.x+'" y="'+(i.anchor.z+1.1)+'" font-size="3" text-anchor="middle" fill="#1B2430" font-family="Bricolage Grotesque,sans-serif" font-weight="800">'+i.id+'</text>';
+    s+='<title>'+String(i.body).slice(0,70).replace(/[<>&]/g,'')+'</title></g>';
+  });
+
+  svg.innerHTML=s;
+  svg.querySelectorAll('.node').forEach(function(g){
+    g.onclick=function(){
+      var kind=g.dataset.kind, k=g.dataset.k;
+      if(FOCUS_KIND===kind && String(FOCUS)===String(k)){ FOCUS=null; FOCUS_KIND=null; }
+      else { FOCUS = (kind==='idea')?+k:k; FOCUS_KIND=kind; }
+      renderSpatial(); renderInspector();
+    };
+  });
+}
+
+function renderInspector(){
+  var el=document.getElementById('inspector');
+  if(!FOCUS_KIND){ el.style.display='none'; return; }
+  el.style.display='block';
+  var h='';
+  if(FOCUS_KIND==='idea'){
+    var i=STATE.ideas.filter(function(v){return v.id===FOCUS})[0];
+    var pr=progress(i), cx=complexity(i.cons||[]);
+    h+='<p class="lbl">IDEA · '+esc(i.anchor?i.anchor.surface:'unplaced')+'</p>';
+    h+='<h3>'+esc(i.body)+'</h3>';
+    h+='<p style="font-size:.88rem"><span class="cx '+cx.cls+'">'+esc(cx.band)+'</span> '+
+       STAGES[i.stage]+' · '+pr.done+'/'+pr.total+' questions closed · '+
+       (i.tenders.length?esc(i.tenders.join(', ')):'nobody tending')+'</p>';
+    h+='<p style="font-size:.88rem">Wired to '+(i.cons||[]).length+' constraints. Tap an orange node to see who else hits the same wall.</p>';
+  }
+  if(FOCUS_KIND==='con'){
+    var c=GRAPH.constraints[FOCUS], sh=sharedBy(FOCUS);
+    h+='<p class="lbl">CONSTRAINT</p><h3>'+esc(c.label)+'</h3>';
+    h+='<p style="font-size:.9rem">'+esc(c.detail)+'</p>';
+    if(c.online) h+='<p style="font-size:.88rem"><span class="mode online">online</span> '+esc(c.online.what)+' · <a href="'+c.online.url+'" target="_blank" rel="noopener">open</a></p>';
+    if(c.call) h+='<p style="font-size:.88rem"><span class="mode call">needs a call</span> '+esc(c.call.agency?agencyName(c.call.agency):'the owner or broker')+' — "'+esc(c.call.ask)+'"</p>';
+    h+='<div class="needs" style="margin-top:.6rem"><p class="lbl">'+sh.length+' IDEA'+(sh.length===1?'':'S')+' HIT THIS SAME WALL</p><ul style="margin:.2rem 0 0;padding-left:1rem;font-size:.88rem">'+
+       sh.map(function(i){return '<li>'+esc(i.body)+'</li>'}).join('')+'</ul>'+
+       (sh.length>1?'<p style="font-size:.86rem;margin:.5rem 0 0">Answer it once and all '+sh.length+' move.</p>':'')+'</div>';
+  }
+  if(FOCUS_KIND==='org'){
+    var o=GRAPH.agencies.filter(function(a){return a.id===FOCUS})[0];
+    h+='<p class="lbl">WHO ANSWERS IT</p><h3>'+esc(o.name)+'</h3>';
+    h+='<p style="font-size:.9rem">'+esc(o.handles)+'</p>';
+    h+='<p style="font-size:.88rem"><b style="color:var(--chalk)">Ask:</b> '+esc(o.ask)+'</p>';
+  }
+  if(FOCUS_KIND==='prog'){
+    var pg=GRAPH.programs.filter(function(v){return v.id===FOCUS})[0];
+    h+='<p class="lbl">MONEY</p><h3>'+esc(pg.name)+' — '+esc(pg.amount)+'</h3>';
+    h+='<p style="font-size:.9rem">'+esc(pg.what)+'</p>';
+    h+='<p style="font-size:.88rem">Administered by '+esc(agencyName(pg.agency)||'—')+'</p>';
+  }
+  h+='<button class="btn sec tiny" onclick="FOCUS=null;FOCUS_KIND=null;renderSpatial();renderInspector();">Clear selection</button>';
+  el.innerHTML=h;
+}
+
+function renderGraph(){
+  var h='<p class="lbl" style="font-family:Bricolage Grotesque,sans-serif;font-size:.68rem;font-weight:800;color:var(--lit);margin:0 0 .35rem">DATA SOURCES</p>';
+  h+=GRAPH.resources.map(function(r){return '<p class="res"><b>'+esc(r.name)+'</b> — '+esc(r.what)+' · <a href="'+r.url+'" target="_blank" rel="noopener">open</a></p>'}).join('');
+  h+='<p class="lbl" style="font-family:Bricolage Grotesque,sans-serif;font-size:.68rem;font-weight:800;color:var(--lit);margin:1rem 0 .35rem">AGENCIES &amp; ORGS ('+GRAPH.agencies.length+')</p>';
+  h+=GRAPH.agencies.map(function(a){return '<p class="res"><b>'+esc(a.name)+'</b> — '+esc(a.handles)+'</p>'}).join('');
+  h+='<p class="lbl" style="font-family:Bricolage Grotesque,sans-serif;font-size:.68rem;font-weight:800;color:var(--lit);margin:1rem 0 .35rem">PROGRAMS ('+GRAPH.programs.length+')</p>';
+  h+=GRAPH.programs.map(function(p){return '<p class="res"><b>'+esc(p.name)+'</b> '+esc(p.amount)+' — '+esc(p.what)+'</p>'}).join('');
+  document.getElementById('graphList').innerHTML=h;
+}
+
+/* ---------- retrieval: graph only, never recall ---------- */
+function retrieve(text){
+  var t=text.toLowerCase(), hits=[];
+  GRAPH.tags.forEach(function(g){
+    for(var i=0;i<g.match.length;i++){ if(t.indexOf(g.match[i])>-1){ hits.push(g); return; } }
+  });
+  var cons={}, progs={}, orgs={}, tags=[];
+  /* parcel-level constraints apply to every idea at this address */
+  (PARCEL.always||[]).forEach(function(k){ if(GRAPH.constraints[k]) cons[k]=1; });
+  hits.forEach(function(h){
+    tags.push(h.tag);
+    h.constraints.forEach(function(c){cons[c]=1});
+    h.programs.forEach(function(p){progs[p]=1});
+    h.orgs.forEach(function(o){orgs[o]=1});
+  });
+  return {
+    tags:tags,
+    constraints:Object.keys(cons).map(function(k){return Object.assign({key:k},GRAPH.constraints[k])}),
+    programs:Object.keys(progs).map(function(k){return GRAPH.programs.filter(function(p){return p.id===k})[0]}).filter(Boolean),
+    orgs:Object.keys(orgs).map(function(k){return GRAPH.agencies.filter(function(a){return a.id===k})[0]}).filter(Boolean)
+  };
+}
+
+function agencyName(id){ var a=GRAPH.agencies.filter(function(x){return x.id===id})[0]; return a?a.name:null; }
+
+function renderResponse(text){
+  var r=retrieve(text);
+  var el=document.getElementById('response');
+  if(!r.tags.length){
+    el.innerHTML='<div class="resp"><h3>Not enough to go on yet</h3>'+
+      '<p class="unknown" style="font-size:.9rem">Nothing in this parcel\'s graph matches that yet, so there is no rule to cite. Rather than guess, this goes to a person.</p>'+
+      '<p style="font-size:.9rem"><b>What would help:</b> name the activity concretely — what happens in the room, how many people, is there food, water, or anyone staying overnight.</p>'+
+      '<button class="btn sec" onclick="alert(\'Flagged. In the real version this routes to a named human.\')">Flag for a human</button></div>';
+    return;
+  }
+  var h='<div class="resp"><h3>Grounded in this parcel\'s facts only</h3>';
+
+  h+='<div class="grp"><p class="lbl">KNOW-HOW — WHAT APPLIES HERE</p><ul>';
+  h+=r.constraints.map(function(c){
+    return '<li><b style="color:var(--chalk)">'+esc(c.label)+'</b> — '+esc(c.detail)+
+      (c.agency?' <small>('+esc(agencyName(c.agency))+' answers this)</small>':'')+'</li>'}).join('');
+  h+='</ul></div>';
+
+  if(r.programs.length){
+    h+='<div class="grp"><p class="lbl">MONEY THAT MAY APPLY</p><ul>';
+    h+=r.programs.map(function(p){return '<li>'+esc(p.name)+' — '+esc(p.amount)+'. '+esc(p.what)+'</li>'}).join('');
+    h+='</ul></div>';
+  }
+
+  h+='<div class="grp"><p class="lbl">DO-HOW — WHO TO ASK, AND WHAT TO ASK THEM</p><ul>';
+  h+=r.orgs.map(function(o){return '<li><b style="color:var(--chalk)">'+esc(o.name)+'</b><br><small>Ask: '+esc(o.ask)+'</small></li>'}).join('');
+  h+='</ul></div>';
+
+  h+='<div class="grp"><p class="lbl">SMALLEST NEXT STEP</p><ul><li>'+
+    esc('Call the first org above and ask exactly that question about '+PARCEL.address+'. Bring the block/lot.')+
+    '</li><li>Come back and add what they told you, so the next person planting something similar starts further along.</li></ul></div>';
+
+  h+='<div class="grp"><p class="lbl">SOURCES FOR THIS PARCEL</p><ul>'+
+    PARCEL.sources.map(function(s){return '<li><a href="'+s.url+'" target="_blank" rel="noopener">'+esc(s.name)+'</a></li>'}).join('')+
+    '</ul></div>';
+
+  h+='<div class="row"><button class="btn sec" onclick="alert(\'Flagged. In the real version this routes to a named human.\')">This looks wrong — flag it</button>'+
+     '<button class="btn sec" id="copyPrompt">Copy LLM prompt</button></div>';
+  h+='<pre id="promptOut" style="display:none"></pre></div>';
+  el.innerHTML=h;
+
+  document.getElementById('copyPrompt').onclick=function(){
+    var prompt=buildPrompt(text,r);
+    var out=document.getElementById('promptOut');
+    out.style.display='block'; out.textContent=prompt;
+    if(navigator.clipboard) navigator.clipboard.writeText(prompt);
+    this.textContent='Copied — paste into Claude';
+  };
+}
+
+/* The LLM is given retrieved facts and told not to add any. */
+function buildPrompt(idea,r){
+  return [
+"You are helping someone who wants to put something in a specific vacant",
+"storefront in San Francisco. Write them a short, warm, practical reply.",
+"",
+"HARD RULE: use ONLY the facts below. If something is not here, say it is",
+"unknown and name who would know. Never state a rule, ordinance, code",
+"section, dollar amount or deadline that is not listed below. A confident",
+"guess is worse than no answer.",
+"",
+"THEIR IDEA:",
+idea,
+"",
+"THE PARCEL:",
+JSON.stringify(PARCEL,null,2),
+"",
+"WHAT APPLIES (retrieved from the parcel graph):",
+JSON.stringify({constraints:r.constraints,programs:r.programs,who_to_ask:r.orgs},null,2),
+"",
+"WRITE:",
+"1. One line acknowledging the idea without flattering it.",
+"2. What applies here and why (know-how), citing only the above.",
+"3. Who to contact and the exact question to ask them (do-how).",
+"4. One concrete thing they could do this week.",
+"Do not tell them whether it will work. Tell them what is true and who decides."
+].join("\n");
+}
+
+/* ---------- wiring ---------- */
+document.getElementById('plant').onclick=function(){
+  var v=document.getElementById('newIdea').value.trim();
+  if(!v){return}
+  var r=retrieve(v), qs=[];
+  r.constraints.forEach(function(c){
+    if(c.online) qs.push({q:c.label, mode:"online", status:"open", where:c.online.what, url:c.online.url});
+    if(c.call)   qs.push({q:c.label, mode:"call", status:"open", who:c.call.agency, ask:c.call.ask});
+  });
+  var consKeys=r.constraints.map(function(c){return c.key});
+  var nid=STATE.nextId++;
+  var spots=[{x:30,z:68,surface:"floor near the entrance"},{x:72,z:30,surface:"back corner"},
+              {x:24,z:22,surface:"back-left wall"},{x:60,z:78,surface:"window bay"}];
+  STATE.ideas.push({id:nid, body:v, stage:0, cons:consKeys,
+    anchor:spots[STATE.ideas.length % spots.length],
+    relayed:document.getElementById('relayed').checked, tenders:[],
+    agree:0, no:0, groups:0, questions:qs});
+  renderIdeas(); renderResponse(v);
+  showPlacement(nid, v, consKeys, qs);
+  document.getElementById('newIdea').value='';
+};
+
+/* Where the new idea lands among the others, then the ask. */
+function showPlacement(nid, body, consKeys, qs){
+  var cx=complexity(consKeys);
+  var others=STATE.ideas.filter(function(i){return i.id!==nid})
+    .map(function(i){return {b:i.body, s:complexity(i.cons||[]).score}})
+    .sort(function(a,b){return a.s-b.s});
+  var easier=others.filter(function(o){return o.s<cx.score}).length;
+  var el=document.getElementById('placement');
+  var onlineN=qs.filter(function(q){return q.mode==='online'}).length;
+  el.style.display='block';
+  el.innerHTML='<p class="lbl">WHERE THIS LANDS</p>'+
+    '<p><span class="cx '+cx.cls+'">'+esc(cx.band)+'</span> '+esc(cx.note)+'</p>'+
+    '<p style="font-size:.88rem">Of the '+(others.length)+' ideas already growing here, '+easier+
+      ' are simpler to pull off and '+(others.length-easier)+' are harder.</p>'+
+    '<p style="font-size:.88rem">It opened with <b>'+qs.length+' questions</b>, '+onlineN+
+      ' of which you could answer yourself online right now.</p>'+
+    '<div class="needs" style="margin-top:.7rem"><p class="lbl">DO YOU WANT TO CONTRIBUTE?</p>'+
+    '<p>An idea nobody tends stops here. Taking one question is enough to move it.</p></div>'+
+    '<div class="row"><button class="btn" id="takeFirst">Take the first question</button>'+
+    '<button class="btn sec" id="justPlant">Just leave it planted</button></div>';
+  document.getElementById('takeFirst').onclick=function(){
+    var idea=STATE.ideas.filter(function(i){return i.id===nid})[0];
+    var first=idea.questions.filter(function(q){return q.status==='open'})[0];
+    if(first){ first.status='working';
+      var who=(STATE.role&&STATE.role!=='Skip')?STATE.role:'someone here';
+      if(idea.tenders.indexOf(who)===-1) idea.tenders.push(who); }
+    el.innerHTML='<p class="lbl">TAKEN</p><p>It\'s on your name now, at the top of the list. Come back with what you find.</p>';
+    renderIdeas();
+    var d=document.getElementById('qs-'+nid); if(d){d.style.display='block'}
+  };
+  document.getElementById('justPlant').onclick=function(){
+    el.innerHTML='<p class="lbl">PLANTED</p><p>Someone else may pick it up. Ideas with nobody tending them are marked, so it stays honest about where it stands.</p>';
+  };
+}
+document.getElementById('checkOnly').onclick=function(){
+  var v=document.getElementById('newIdea').value.trim();
+  if(v) renderResponse(v);
+};
+document.getElementById('editParcel').onclick=function(){
+  var d=document.getElementById('parcelEdit');
+  d.style.display=d.style.display==='none'?'block':'none';
+};
+document.getElementById('saveParcel').onclick=function(){
+  try{ PARCEL=JSON.parse(document.getElementById('parcelJson').value); renderParcel();
+       document.getElementById('parcelEdit').style.display='none'; }
+  catch(e){ alert('That JSON has a syntax error: '+e.message); }
+};
+document.getElementById('showLists').onclick=function(){
+  var d=document.getElementById('graphList');
+  var open=d.style.display!=='none';
+  d.style.display=open?'none':'block';
+  this.textContent=open?'Show the source lists':'Hide the source lists';
+};
+
+document.getElementById('export').onclick=function(){
+  var out=document.getElementById('exportOut');
+  out.style.display='block';
+  out.textContent=JSON.stringify({parcel:PARCEL, ideas:STATE.ideas.map(function(i){
+    var p=progress(i);
+    return {body:i.body, stage:STAGES[i.stage], agree:i.agree, groups:i.groups,
+            relayed:i.relayed, tending:i.tenders,
+            answered:p.done+'/'+p.total,
+            needs_next:p.next?p.next.q:null,
+            mode:p.next?p.next.mode:null,
+            open_questions:i.questions.filter(function(q){return q.status!=='resolved'})
+              .map(function(q){return {q:q.q, mode:q.mode, where:q.where||null, ask:q.ask||null}}),
+            resolved:i.questions.filter(function(q){return q.status==='resolved'})
+              .map(function(q){return {q:q.q, answer:q.answer, by:q.by}})};
+  })},null,2);
+  if(navigator.clipboard) navigator.clipboard.writeText(out.textContent);
+  this.textContent='Copied to clipboard';
+};
+
+/* ---------- entry: three ways to identify the parcel ---------- */
+function openParcel(rec, how){
+  PARCEL = JSON.parse(JSON.stringify(rec));
+  PARCEL._how = how;
+  document.getElementById('scanGate').style.display='none';
+  document.getElementById('afterScan').style.display='block';
+  renderParcel();
+  initSteps(); setStepMode(true);
+  var b=document.getElementById('howLoaded');
+  if(b) b.textContent = how;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.querySelectorAll('.entry .tab').forEach(function(t){
+  t.onclick=function(){
+    document.querySelectorAll('.entry .tab').forEach(function(o){o.classList.remove('on')});
+    t.classList.add('on');
+    ['qr','addr','scan'].forEach(function(k){
+      document.getElementById('pane-'+k).style.display = (k===t.dataset.t)?'block':'none';
+    });
+  };
+});
+
+document.getElementById('goQr').onclick=function(){
+  openParcel(PARCELS[0], 'loaded from the QR sticker in the window at 225 Bush');
+};
+
+var addrIn=document.getElementById('addrIn'), addrHits=document.getElementById('addrHits');
+addrIn.oninput=function(){
+  var q=addrIn.value.trim().toLowerCase();
+  if(q.length<2){ addrHits.innerHTML=''; return; }
+  var hits=PARCELS.filter(function(r){return r.address.toLowerCase().indexOf(q)>-1});
+  if(!hits.length){
+    addrHits.innerHTML='<p class="hit none">No parcel on file for that yet. You can enter the facts by hand below.</p>';
+    return;
+  }
+  addrHits.innerHTML=hits.map(function(r,i){
+    return '<button class="hit" data-i="'+PARCELS.indexOf(r)+'"><b>'+esc(r.address)+'</b>'+
+      '<small>'+esc(r.block_lot)+' · '+esc(r.zoning_district)+' · vacant since '+esc(r.vacant_since)+'</small></button>';
+  }).join('');
+  addrHits.querySelectorAll('.hit').forEach(function(b){
+    b.onclick=function(){ openParcel(PARCELS[+b.dataset.i], 'looked up by address'); };
+  });
+};
+
+document.getElementById('manualEntry').onclick=function(){
+  var blank={address:addrIn.value.trim()||"Address not set", district:"unknown", block_lot:"unknown",
+    zoning_district:"unknown", ground_floor_sqft:"unknown", vacant_since:"unknown",
+    owner_entity:"unknown", last_known_use:"unknown", permit_notes:[], known_constraints:[],
+    sources:[{name:"SF Property Information Map", url:"https://sfplanninggis.org/pim/"},
+             {name:"DataSF", url:"https://datasf.org/opendata/"}]};
+  openParcel(blank, 'entered by hand — fill in the facts below before trusting any response');
+  document.getElementById('parcelEdit').style.display='block';
+};
+
+function scanResolved(label){
+  var out=document.getElementById('scanOut');
+  out.innerHTML='<p class="hit none">Read location from <b>'+esc(label)+'</b>. Matching against parcels on file…</p>';
+  setTimeout(function(){
+    out.innerHTML=PARCELS.map(function(r,i){
+      return '<button class="hit" data-i="'+i+'"><b>'+esc(r.address)+'</b><small>closest parcel to the capture · '+esc(r.block_lot)+'</small></button>';
+    }).join('');
+    out.querySelectorAll('.hit').forEach(function(b){
+      b.onclick=function(){ openParcel(PARCELS[+b.dataset.i], 'resolved from an uploaded scan'); };
+    });
+  }, 450);
+}
+document.getElementById('scanIn').onchange=function(){
+  if(this.value.trim()) scanResolved(this.value.trim());
+};
+var drop=document.getElementById('drop');
+['dragenter','dragover'].forEach(function(e){ drop.addEventListener(e,function(ev){
+  ev.preventDefault(); drop.classList.add('over'); }); });
+['dragleave','drop'].forEach(function(e){ drop.addEventListener(e,function(ev){
+  ev.preventDefault(); drop.classList.remove('over'); }); });
+drop.addEventListener('drop',function(ev){
+  var f=ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
+  scanResolved(f?f.name:'dropped file');
+});
+drop.addEventListener('click',function(){ scanResolved('sample capture'); });
+document.querySelectorAll('#lens button').forEach(function(b){
+  b.onclick=function(){
+    LENS=b.dataset.l;
+    document.querySelectorAll('#lens button').forEach(function(o){o.classList.remove('on')});
+    b.classList.add('on');
+    renderIdeas();
+  };
+});
+
+renderParcel(); renderRoles(); renderIdeas(); renderGraph(); renderSpatial(); renderRepo(); sbBadge();
+document.getElementById('showBoard').onclick=function(){
+  var d=document.getElementById('board'), open=d.style.display!=='none';
+  d.style.display=open?'none':'block';
+  this.textContent=open?'Contributors':'Hide contributors';
+};
+document.getElementById('open3d').onclick=open3d;
+document.getElementById('close3d').onclick=close3d;
+document.querySelectorAll('.topo .tb').forEach(function(b){
+  b.onclick=function(){
+    TOPO=b.dataset.topo;
+    document.querySelectorAll('.topo .tb').forEach(function(o){o.classList.remove('on')});
+    b.classList.add('on');
+    if(THREE_READY && T.renderer){ if(T.req)cancelAnimationFrame(T.req); build3d(); }
+  };
+});
+document.getElementById('stepPrev').onclick=function(){ goStep(STEP-1) };
+document.getElementById('stepNext').onclick=function(){
+  if(STEP===STEPS.length-1){ openDeck(); return }
+  goStep(STEP+1);
+};
+document.addEventListener('keydown',function(e){
+  if(!STEP_MODE) return;
+  if(document.getElementById('deckWrap').style.display!=='none') return;
+  if(document.getElementById('chatWrap').style.display!=='none') return;
+  if(e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+  if(e.key==='ArrowRight') goStep(STEP+1);
+  if(e.key==='ArrowLeft') goStep(STEP-1);
+});
+document.getElementById('openDeck').onclick=openDeck;
+document.getElementById('deckPrev').onclick=function(){deckStep(-1)};
+document.getElementById('deckNext').onclick=function(){deckStep(1)};
+document.getElementById('deckClose').onclick=function(){document.getElementById('deckWrap').style.display='none'};
+document.addEventListener('keydown',function(e){
+  if(document.getElementById('deckWrap').style.display==='none') return;
+  if(e.key==='ArrowRight'||e.key===' ') deckStep(1);
+  if(e.key==='ArrowLeft') deckStep(-1);
+  if(e.key==='Escape') document.getElementById('deckWrap').style.display='none';
+});
+document.getElementById('deckStage').addEventListener('click',function(e){
+  var r=this.getBoundingClientRect();
+  deckStep((e.clientX-r.left) > r.width*0.35 ? 1 : -1);
+});
+
+document.getElementById('toggleStep').onclick=function(){ setStepMode(!STEP_MODE) };
+document.getElementById('openAgent').onclick=function(){
+  var st=agentState();
+  document.getElementById('agentBody').innerHTML=
+   '<p class="lbl">TRY IT</p><p class="mline">Open the console and run:</p>'+
+   '<pre>PlantAnIdea.match("food access and community kitchens")\nPlantAnIdea.state()\nPlantAnIdea.plant("an idea", {by:"me"})</pre>'+
+   '<p class="lbl">ASK IN PLAIN LANGUAGE</p>'+
+   '<input type="text" id="agentQ" placeholder="which ideas here align with my interests?">'+
+   '<button class="btn" id="agentGo">Match</button><div id="agentHits"></div>'+
+   '<p class="lbl">FULL STATE (what an agent reads)</p><pre>'+esc(JSON.stringify(st,null,2))+'</pre>'+
+   '<p class="lbl">SUPABASE SCHEMA</p><pre>'+esc(SB_SCHEMA)+'</pre>';
+  document.getElementById('agentWrap').style.display='flex';
+  document.getElementById('agentGo').onclick=function(){
+    var hits=matchInterests(document.getElementById('agentQ').value);
+    document.getElementById('agentHits').innerHTML = hits.length
+      ? hits.map(function(v){return '<div class="hit"><b>'+esc(v.idea)+'</b><small>'+esc(v.repo_id)+
+          ' · '+esc(v.why.join(' · '))+(v.needs_next?' · needs: '+esc(v.needs_next):'')+'</small></div>'}).join('')
+      : '<p class="pnote">Nothing here matches that yet. That is a gap worth planting into.</p>';
+  };
+};
+document.getElementById('closeAgent').onclick=function(){document.getElementById('agentWrap').style.display='none'};
+
+document.getElementById('closeMail').onclick=function(){ document.getElementById('mailWrap').style.display='none' };
+document.getElementById('closeChat').onclick=function(){ document.getElementById('chatWrap').style.display='none' };
+document.getElementById('chatSend').onclick=sendChat;
+document.getElementById('chatIn').addEventListener('keydown',function(e){ if(e.key==='Enter') sendChat(); });
+</script>
+</body>
+</html>
