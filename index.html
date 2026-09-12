@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Plant an Idea — parcel prototype</title>
+<meta name="description" content="A working parcel demo: plant an idea on a real vacant storefront, agree or disagree with what others planted, and see a cited local blocker with a named next step. Built at Building for SF for 225 Bush Street.">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,600&display=swap" rel="stylesheet">
 <style>
 :root{--dusk:#1B2430;--pane:#232F3E;--pane2:#2B3949;--lit:#F2C14E;--moss:#84B096;
@@ -263,6 +264,22 @@ hr{border:0;border-top:1px solid var(--rule);margin:1.6rem 0}
 "spatialCoverage":{"@type":"Place","address":"225 Bush Street, San Francisco, CA 94104"},
 "potentialAction":{"@type":"SearchAction","description":"Call window.PlantAnIdea.match(interests) to rank ideas, or window.PlantAnIdea.state() for the full graph."}}
 </script>
+<!-- og:start -->
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="InnerCartography">
+<meta property="og:url" content="https://innercartography.one/hyperblogs/plant-an-idea-app/">
+<meta property="og:title" content="Plant an Idea — parcel prototype">
+<meta property="og:description" content="A working parcel demo: plant an idea on a real vacant storefront, agree or disagree with what others planted, and see a…">
+<meta property="og:image" content="https://innercartography.one/hyperblogs/plant-an-idea-app/og.jpg?v=a01ab234">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Plant an Idea — parcel prototype — InnerCartography">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Plant an Idea — parcel prototype">
+<meta name="twitter:description" content="A working parcel demo: plant an idea on a real vacant storefront, agree or disagree with what others planted, and see a…">
+<meta name="twitter:image" content="https://innercartography.one/hyperblogs/plant-an-idea-app/og.jpg?v=a01ab234">
+<!-- og:end -->
 </head>
 <body>
 <div class="wrap">
@@ -386,8 +403,15 @@ hr{border:0;border-top:1px solid var(--rule);margin:1.6rem 0}
   <div id="graphList" style="display:none;margin-top:.8rem"></div>
 </div>
 
+<div class="card">
+  <h2><span class="n">07</span> Nothing gets scrapped</h2>
+  <p><small>An idea that doesn't work here isn't dead. It's mislocated.</small></p>
+  <p>Ten parcels in one district, and the same response becomes: not this address, try that one, and here's who to call.</p>
+  <p><b>Every civic tool tells people no. This one tells them where.</b></p>
+</div>
+
 <div class="card warn">
-  <h2><span class="n">07</span> Export</h2>
+  <h2><span class="n">08</span> Export</h2>
   <p><small>Nothing persists on its own. Export before closing the tab.</small></p>
   <button class="btn" id="export">Export all data as JSON</button>
   <pre id="exportOut" style="display:none"></pre>
